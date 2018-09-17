@@ -152,6 +152,8 @@ autocmd FileType python set foldmethod=indent
 autocmd FileType arduino set syntax=arduino
 autocmd FileType arduino set filetype=cpp
 
+autocmd FileType tex set makeprg=pdflatex\ %
+
 
 highlight MatchParen ctermbg=238
 highlight Folded ctermbg=black
@@ -185,3 +187,4 @@ function! MyFoldText() " {{{
 "    return line . ' -' . foldedlinecount . '-' . repeat(" ", fillcharcount)
 endfunction " }}}
 set foldtext=MyFoldText()
+
