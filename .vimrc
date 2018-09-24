@@ -153,6 +153,7 @@ autocmd FileType arduino set syntax=arduino
 autocmd FileType arduino set filetype=cpp
 
 autocmd FileType tex set makeprg=pdflatex\ %
+autocmd FileType tex set spell
 
 
 highlight MatchParen ctermbg=238

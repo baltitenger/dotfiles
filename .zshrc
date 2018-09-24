@@ -54,9 +54,10 @@ setopt CORRECT
 setopt HIST_IGNORE_DUPS
 setopt HIST_FIND_NO_DUPS
 zmodload zsh/mathfunc
+autoload -U zmv
 
-aurman() {
-  command aurman $@ && rehash
+yay() {
+  command yay $@ && rehash
 }
 
 # Arduino-mk environmental variables
