@@ -152,7 +152,8 @@ autocmd FileType python set foldmethod=indent
 autocmd FileType arduino set syntax=arduino
 autocmd FileType arduino set filetype=cpp
 
-autocmd FileType tex set makeprg=pdflatex\ %
+"autocmd FileType tex set makeprg=pdflatex\ %
+let g:LatexBox_latexmk_preview_continously=1
 autocmd FileType tex set spell
 
 
