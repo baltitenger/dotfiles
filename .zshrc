@@ -20,7 +20,8 @@ autoload -Uz compinit
 compinit
 # End of lines added by compinstall
 
-alias less='less --RAW-CONTROL-CHARS'
+export LESSOPEN="| /usr/bin/src-hilite-lesspipe.sh %s"
+export LESS=' -R '
 export LS_OPTS='--color=auto'
 alias ls='ls ${LS_OPTS}'
 alias grep='grep --color=auto'
