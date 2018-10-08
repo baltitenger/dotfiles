@@ -42,18 +42,23 @@ bindkey '^R' history-incremental-search-backward
 alias fuck='sudo $(fc -ln -1)'
 # alias ssh='/home/baltazar/bin/ssh.sh'
 
-bindkey ""    backward-delete-char
-bindkey ""    backward-kill-word
-bindkey ""    backward-kill-word
-bindkey ""    backward-kill-line
-bindkey "[3~" delete-char
-bindkey ""  self-insert-unmeta
-bindkey "OM"  push-input
+bindkey ""      backward-delete-char
+bindkey ""      backward-kill-word
+bindkey ""      backward-kill-word
+bindkey ""      backward-kill-line
+bindkey "[3~"   delete-char
+bindkey ""    self-insert-unmeta
+bindkey "OM"    push-input
+bindkey "[1;5D" backward-word
+bindkey "[1;5C" forward-word
+bindkey "OH"    beginning-of-line
+bindkey "OF"    end-of-line
 
 setopt INTERACTIVE_COMMENTS
 setopt CORRECT
 setopt HIST_IGNORE_DUPS
 setopt HIST_FIND_NO_DUPS
+setopt NO_HUP
 zmodload zsh/mathfunc
 autoload -U zmv
 
@@ -73,4 +78,7 @@ export AVRDUDE_CONF=/etc/avrdude.conf
 export MONITOR_CMD=/home/baltazar/bin/monitor
 export ARDUINO_QUIET=1
 # ---
+
+eval $(dircolors)
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
