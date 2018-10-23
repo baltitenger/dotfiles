@@ -152,8 +152,6 @@ autocmd FileType python set foldmethod=indent
 autocmd FileType arduino set syntax=arduino
 autocmd FileType arduino set filetype=cpp
 
-"autocmd FileType tex set makeprg=pdflatex\ %
-let g:LatexBox_latexmk_preview_continously=1
 autocmd FileType tex set spell
 
 
@@ -161,12 +159,7 @@ highlight MatchParen ctermbg=238
 highlight Folded ctermbg=black
 set showmatch
 
-"execute pathogen#infect()
-"let g:arduino_dir="/usr/share/arduino"
-
 let g:ycm_global_ycm_extra_conf = '/usr/share/vim/vimfiles/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
-let g:ycm_server_python_interpreter = '/usr/bin/python2'
-let g:ycm_python_binary_path = 'python'
 let g:ycm_confirm_extra_conf = 0
 let g:ycm_autoclose_preview_window_after_insertion = 1
 
@@ -190,3 +183,7 @@ function! MyFoldText() " {{{
 endfunction " }}}
 set foldtext=MyFoldText()
 
+filetype plugin indent on
+set grepprg=grep\ -nH\ $*
+let g:tex_flavor = "latex"
+let g:Tex_DefaultTargetFormat = "pdf"
