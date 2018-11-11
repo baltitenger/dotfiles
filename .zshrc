@@ -22,13 +22,11 @@ compinit
 
 export LESSOPEN="| /usr/bin/src-hilite-lesspipe.sh %s"
 export LESS=' -R '
-export LS_OPTS='--color=auto'
-alias ls='ls ${LS_OPTS}'
+alias ls='ls -v --color=auto'
 alias grep='grep --color=auto'
-# export PS1='%B[%n@%m %1~]%(#.#.$)%b '
 export PS1='%B%F{green}%n@%m%f:%F{blue}%1~%f%b%(#.#.$) '
 
-export EDITOR=/usr/bin/vim
+export EDITOR=/usr/bin/nvim
 
 autoload -Uz add-zsh-hook
 function set-title-precmd() {

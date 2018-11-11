@@ -6,3 +6,8 @@
 !.ssh/
 !.ssh/config
 !.toprc
+!.gitconfig
+!.SpaceVim.d/
+!.SpaceVim.d/init.toml
+!.SpaceVim.d/autoload/
+!.SpaceVim.d/autoload/myspacevim.vim
