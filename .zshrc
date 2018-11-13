@@ -20,6 +20,10 @@ autoload -Uz compinit
 compinit
 # End of lines added by compinstall
 
+function config {
+   /usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME $@
+}
+
 export LESSOPEN="| /usr/bin/src-hilite-lesspipe.sh %s"
 export LESS=' -R '
 alias ls='ls -v --color=auto'
