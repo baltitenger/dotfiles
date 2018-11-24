@@ -26,6 +26,7 @@
   lint_on_the_fly	= true
   windows_smartclose = ""
   bootstrap_before = "myspacevim#before"
+  automatic_update = 1
 
 # Enable autocomplete layer
 [[layers]]
@@ -64,6 +65,9 @@
 
 [[layers]]
   name = "lang#vim"
+
+[[layers]]
+  name = "lang#c"
 
 [[layers]]
   name = "debug"
