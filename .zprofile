@@ -1,8 +1,4 @@
-SSH_AGENT=/usr/bin/ssh-agent
-# Run ssh-agent only if not already running, and available
-if [ -x "${SSH_AGENT}" ] ; then
-  if [ -z "${SSH_AGENT_PID}" ]; then
-    eval "$(${SSH_AGENT} -s)"
-  fi
-fi
 export PATH="/home/baltazar/bin:/home/baltazar/.local/bin:$PATH"
+gpg-connect-agent /bye
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+gpg-connect-agent updatestartuptty /bye
