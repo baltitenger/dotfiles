@@ -34,7 +34,7 @@ export EDITOR=/usr/bin/nvim
 
 autoload -Uz add-zsh-hook
 function set-title-precmd() {
-    echo -n "\e]2;$USER@$HOST:`basename "${PWD/#$HOME/~}"`\a"
+  echo -n "\e]2;$USER@$HOST:`basename "${PWD/#$HOME/~}"`\a"
 }
 add-zsh-hook precmd set-title-precmd
 
@@ -43,6 +43,12 @@ bindkey '^R' history-incremental-search-backward
 
 alias fuck='sudo $(fc -ln -1)'
 # alias ssh='/home/baltazar/bin/ssh.sh'
+
+alias gpgupdatetty="gpg-connect-agent updatestartuptty /bye > /dev/null"
+gpgupdatetty
+
+alias ssh="gpgupdatetty && ssh"
+alias scp="gpgupdatetty && scp"
 
 bindkey ""      backward-delete-char
 bindkey ""      backward-kill-word
@@ -83,4 +89,3 @@ export ARDUINO_QUIET=1
 
 eval $(dircolors)
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
-
