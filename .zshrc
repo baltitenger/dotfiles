@@ -41,8 +41,7 @@ add-zsh-hook precmd set-title-precmd
 bindkey -v
 bindkey '^R' history-incremental-search-backward
 
-alias fuck='sudo $(fc -ln -1)'
-# alias ssh='/home/baltazar/bin/ssh.sh'
+alias fuck=' sudo $(fc -ln -1)'
 
 alias gpgupdatetty="gpg-connect-agent updatestartuptty /bye > /dev/null"
 gpgupdatetty
@@ -64,8 +63,10 @@ bindkey "OF"    end-of-line
 
 setopt INTERACTIVE_COMMENTS
 setopt CORRECT
-setopt HIST_IGNORE_DUPS
+setopt APPEND_HISTORY
 setopt HIST_FIND_NO_DUPS
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
 setopt NO_HUP
 zmodload zsh/mathfunc
 autoload -U zmv
