@@ -1,9 +1,8 @@
 # This is Git's per-user configuration file.
 [user]
-# Please adapt and uncomment the following lines:
-name = Baltazár Radics
-email = baltazar.radics@gmail.com
-	signingkey = 9440F591E4397C3E
+  name = Baltazár Radics
+  email = baltazar.radics@gmail.com
+  signingkey = 9440F591E4397C3E
 [diff]
   tool = nvimdiff
 [difftool]
@@ -17,4 +16,4 @@ email = baltazar.radics@gmail.com
 [mergetool "nvimdiff"]
   cmd = nvim -d $LOCAL $REMOTE $MERGED # -c '$wincmd w' -c 'wincmd J'
 [commit]
-	gpgsign = true
+  gpgsign = true

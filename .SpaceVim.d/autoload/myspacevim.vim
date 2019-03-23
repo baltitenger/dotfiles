@@ -6,6 +6,8 @@ func! myspacevim#before() abort
   set clipboard+=unnamedplus
   set foldmethod=syntax
   set title
+  set modeline
+  let g:tex_comment_nospell = 1
 
   let g:discord_fts_whitelist = ['asm', 'c', 'chef', 'coffee', 'cpp', 'crystal', 'cs', 'css', 'd', 'dart', 'diff', 'dockerfile', 'elixir', 'erlang', 'git', 'gitconfig', 'gitignore', 'go', 'haskell', 'html', 'javascript', 'json', 'jsx', 'kotlin', 'lang_c', 'lang_d', 'less', 'lua', 'markdown', 'neovim', 'nix', 'perl', 'php', 'python', 'ruby', 'rust', 'sass', 'scss', 'sh', 'swagger', 'tex', 'tf', 'vim', 'xml', 'yaml', 'java', 'txt']
 
