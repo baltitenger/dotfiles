@@ -1,0 +1,38 @@
+[options]
+#font = Monospace 10
+font = Noto Sans Mono 10
+mouse_autohide = true
+hyperlinks = true
+
+# Emit escape sequences for extra modified keys
+#modify_other_keys = false
+
+[colors]
+# If both of these are unset, cursor falls back to the foreground color,
+# and cursor_foreground falls back to the background color.
+#cursor = #dcdccc
+#cursor_foreground = #dcdccc
+
+foreground = #18f018
+#foreground_bold = #ffffff
+background = #000000
+
+# 20% background transparency (requires a compositor)
+#background = rgba(63, 63, 63, 0.8)
+#background = rgba(0, 0, 0, 0.8)
+
+# If unset, will reverse foreground and background
+highlight = #403d3d
+
+[hints]
+#font = Monospace 12
+#foreground = #dcdccc
+#background = #3f3f3f
+#active_foreground = #e68080
+#active_background = #3f3f3f
+#padding = 2
+#border = #3f3f3f
+#border_width = 0.5
+#roundness = 2.0
+
+# vim: ft=dosini cms=#%s
