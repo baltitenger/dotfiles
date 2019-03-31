@@ -2,7 +2,7 @@
 HISTFILE=~/.histfile
 HISTSIZE=10000
 SAVEHIST=10000
-setopt appendhistory extendedglob notify
+setopt appendhistory notify
 bindkey -v
 # End of lines configured by zsh-newuser-install
 # The following lines were added by compinstall
@@ -21,11 +21,11 @@ compinit
 # End of lines added by compinstall
 
 function config {
-   /usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME $@
+  /usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME $@
 }
 
 export LESSOPEN="| /usr/bin/src-hilite-lesspipe.sh %s"
-export LESS=' -R '
+export LESS='-R '
 alias ls='ls -v --color=auto'
 alias grep='grep --color=auto'
 export PS1='%B%F{green}%n@%m%f:%F{blue}%1~%f%b%(#.#.$) '
