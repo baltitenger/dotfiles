@@ -41,8 +41,6 @@ add-zsh-hook precmd set-title-precmd
 bindkey -v
 bindkey '^R' history-incremental-search-backward
 
-alias fuck=' sudo $(fc -ln -1)'
-
 alias gpgupdatetty="gpg-connect-agent updatestartuptty /bye > /dev/null"
 gpgupdatetty
 
@@ -90,3 +88,5 @@ export ARDUINO_QUIET=1
 
 eval $(dircolors)
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+
+alias tmus="tmux attach -t cmus"

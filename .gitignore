@@ -11,3 +11,7 @@
 !.config/termite/config
 !.config/nvim
 !.config/nvim/init.vim
+!.config/redshift.conf
+!.config/redshift/
+!.config/redshift/hooks/
+!.config/redshift/hooks/notify.sh

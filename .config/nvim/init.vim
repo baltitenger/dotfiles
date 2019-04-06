@@ -5,6 +5,7 @@ set mouse=a
 set foldmethod=syntax foldlevelstart=99
 set modeline
 set undofile
+set scrolloff=3
 autocmd BufWritePre /tmp/* setlocal noundofile
 
 "Enable fancy colors
@@ -39,6 +40,7 @@ call plug#begin('~/.local/share/nvim/plugged')
   Plug 'lambdalisue/gina.vim'
   Plug 'lambdalisue/suda.vim'
   Plug 'mhinz/vim-signify'
+  Plug 'majutsushi/tagbar', { 'on_cmd' : 'TagbarToggle' }
 "  Plug 'aurieh/discord.nvim', { 'do': ':silent UpdateRemotePlugins'}
 call plug#end()
 
@@ -47,7 +49,7 @@ silent! call neomake#configure#automake('nrwi', 500)
 "let g:deoplete#enable_at_startup = 1
 silent! call deoplete#custom#option('smart_case', v:true)
 
-autocmd FileType cpp let g:chromatica#enable_at_startup = 1
+let g:chromatica#enable_at_startup = 1
 
 let g:tex_comment_nospell = 1
 let g:tex_fold_enabled = 1
@@ -56,6 +58,7 @@ let g:vimtex_compiler_latexmk_engines = {'_': '-lualatex'}
 autocmd FileType tex setlocal spell
 
 autocmd FileType python setlocal foldmethod=indent
+let g:python_recommended_style=0
 
 command! W write suda://%
 command! E edit suda://%
