@@ -15,3 +15,6 @@
 !.config/redshift/
 !.config/redshift/hooks/
 !.config/redshift/hooks/notify.sh
+!.local
+!.local/bin
+!.local/bin/ss

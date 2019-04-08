@@ -1,0 +1,17 @@
+#! /bin/sh
+
+file="/tmp/screenshot.png"
+qdbus org.kde.KWin /Compositor org.kde.kwin.Compositing.suspend
+case "$1" in
+  "r") # whole screen
+    import -window root $file
+    ;;
+  "w") # selected window
+    import -window $(xwininfo | grep -o "0x\w*" | head -1) $file
+    ;;
+  *) # rectangular region
+    import $file
+    ;;
+esac
+qdbus org.kde.KWin /Compositor org.kde.kwin.Compositing.resume
+xclip -sel clip -t image/png -i /tmp/screenshot.png

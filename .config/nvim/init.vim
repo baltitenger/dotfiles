@@ -6,6 +6,7 @@ set foldmethod=syntax foldlevelstart=99
 set modeline
 set undofile
 set scrolloff=3
+set title
 autocmd BufWritePre /tmp/* setlocal noundofile
 
 "Enable fancy colors
@@ -32,7 +33,7 @@ if empty(glob('~/.local/share/nvim/site/autoload/plug.vim'))
 endif
 
 call plug#begin('~/.local/share/nvim/plugged')
-  Plug 'neomake/neomake'
+  Plug 'w0rp/ale'
   Plug 'arakashic/chromatica.nvim', { 'do': ':silent UpdateRemotePlugins'}
   Plug 'Shougo/deoplete.nvim', { 'do': ':silent UpdateRemotePlugins'}
   Plug 'Shougo/neoinclude.vim'
@@ -44,12 +45,17 @@ call plug#begin('~/.local/share/nvim/plugged')
 "  Plug 'aurieh/discord.nvim', { 'do': ':silent UpdateRemotePlugins'}
 call plug#end()
 
-silent! call neomake#configure#automake('nrwi', 500)
+let g:ale_fixers = {
+\ 'cpp': [
+\   'clang-format',
+\ ],
+\}
 
 "let g:deoplete#enable_at_startup = 1
 silent! call deoplete#custom#option('smart_case', v:true)
 
 let g:chromatica#enable_at_startup = 1
+let g:chromatica#responsive_mode = 1
 
 let g:tex_comment_nospell = 1
 let g:tex_fold_enabled = 1
