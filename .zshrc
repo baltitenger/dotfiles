@@ -27,8 +27,10 @@ export LESS='-R '
 alias ls='ls -v --color=auto'
 alias grep='grep --color=auto'
 export PS1='%B%F{green}%n@%m%f:%F{blue}%1~%f%b%(#.#.$) '
+alias pacdiff='sudo DIFFPROG="/usr/bin/nvim -d" DIFFSEARCHPATH="/boot /etc /usr" pacdiff'
+alias sudo='sudo '
 
-export EDITOR=/usr/bin/nvim
+export EDITOR='/usr/bin/nvim'
 
 autoload -Uz add-zsh-hook
 function set-title-precmd() {
