@@ -26,9 +26,11 @@ export LESSOPEN="| /usr/bin/src-hilite-lesspipe.sh %s"
 export LESS='-R '
 alias ls='ls -v --color=auto'
 alias grep='grep --color=auto'
-export PS1='%B%F{green}%n@%m%f:%F{blue}%1~%f%b%(#.#.$) '
+export PS1='%B%F{%(!.red.green)}%n%F{cyan}@%F{yellow}%m%f:%F{blue}%1~%F{%(?.default.red)}%(#.#.$)%f%b '
 alias pacdiff='sudo DIFFPROG="/usr/bin/nvim -d" DIFFSEARCHPATH="/boot /etc /usr" pacdiff'
 alias sudo='sudo '
+alias ytdl="youtube-dl --add-metadata -i -o '%(title)s.%(ext)s'"
+alias ccat="source-highlight-esc.sh"
 
 export EDITOR='/usr/bin/nvim'
 
@@ -90,3 +92,11 @@ eval $(dircolors)
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
 alias tmus="tmux attach -t cmus"
+
+#source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
+bindkey -M vicmd 'k' history-substring-search-up
+bindkey -M vicmd 'j' history-substring-search-down

@@ -20,3 +20,4 @@
 !.local
 !.local/bin
 !.local/bin/ss
+!.tmux.conf
