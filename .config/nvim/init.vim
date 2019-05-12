@@ -8,6 +8,8 @@ set undofile
 set scrolloff=3
 set title
 autocmd BufWritePre /tmp/* setlocal noundofile
+set path+=**
+let g:netrw_banner=0
 
 "Enable fancy colors
 if $TERM isnot# 'linux'
@@ -23,12 +25,34 @@ autocmd BufReadPost *
   \ |   exe "normal! g`\""
   \ | endif
 
+autocmd BufReadPost *
+  \ if filereadable("CMakeLists.txt")
+  \ |   set makeprg=make\ -Cbuild\ -j$(nproc)
+  \ | endif
+
 nmap <Leader>/ :noh<CR>
+nmap Y y$
+
+tnoremap <Esc> <C-\><C-n>
+tnoremap <A-h> <C-\><C-N><C-w>h
+tnoremap <A-j> <C-\><C-N><C-w>j
+tnoremap <A-k> <C-\><C-N><C-w>k
+tnoremap <A-l> <C-\><C-N><C-w>l
+inoremap <A-h> <C-\><C-N><C-w>h
+inoremap <A-j> <C-\><C-N><C-w>j
+inoremap <A-k> <C-\><C-N><C-w>k
+inoremap <A-l> <C-\><C-N><C-w>l
+nnoremap <A-h> <C-w>h
+nnoremap <A-j> <C-w>j
+nnoremap <A-k> <C-w>k
+nnoremap <A-l> <C-w>l
+
+nnoremap <leader>f :ALEFix<CR>
 
 "Install Plug if not found
 if empty(glob('~/.local/share/nvim/site/autoload/plug.vim'))
-  silent !curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs
-    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  silent !curl -fLo '~/.local/share/nvim/site/autoload/plug.vim' --create-dirs
+    \ 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
@@ -42,12 +66,18 @@ call plug#begin('~/.local/share/nvim/plugged')
   Plug 'lambdalisue/suda.vim'
   Plug 'mhinz/vim-signify'
   Plug 'majutsushi/tagbar', { 'on_cmd' : 'TagbarToggle' }
+  Plug 'sakhnik/nvim-gdb', { 'do': ':!./install.sh \| UpdateRemotePlugins' }
+  Plug 'vim-scripts/DoxygenToolkit.vim'
 "  Plug 'aurieh/discord.nvim', { 'do': ':silent UpdateRemotePlugins'}
 call plug#end()
 
 let g:ale_fixers = {
 \ 'cpp': [
 \   'clang-format',
+\ ],
+\ 'html': [
+\   'tidy',
+\   'prettier',
 \ ],
 \}
 

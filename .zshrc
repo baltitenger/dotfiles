@@ -26,13 +26,16 @@ export LESSOPEN="| /usr/bin/src-hilite-lesspipe.sh %s"
 export LESS='-R '
 alias ls='ls -v --color=auto'
 alias grep='grep --color=auto'
-export PS1='%B%F{%(!.red.green)}%n%F{cyan}@%F{yellow}%m%f:%F{blue}%1~%F{%(?.default.red)}%(#.#.$)%f%b '
+export PS1='%B%F{%(!.red.green)}%n%F{cyan}@%F{yellow}%m%f:%F{blue}%1~%F{%(?.green.red)}%(#.#.$)%f%b '
 alias pacdiff='sudo DIFFPROG="/usr/bin/nvim -d" DIFFSEARCHPATH="/boot /etc /usr" pacdiff'
 alias sudo='sudo '
 alias ytdl="youtube-dl --add-metadata -i -o '%(title)s.%(ext)s'"
 alias ccat="source-highlight-esc.sh"
 
 export EDITOR='/usr/bin/nvim'
+export PAGER='less'
+export BROWSER='opera'
+export PDFVIEWER='okular'
 
 autoload -Uz add-zsh-hook
 function set-title-precmd() {
@@ -79,10 +82,10 @@ yay() {
 export ARDUINO_DIR=/usr/share/arduino
 export ARDMK_DIR=/usr/share/arduino
 export AVR_TOOLS_DIR=/usr
-export ARDUINO_CORE_PATH=/usr/share/arduino/hardware/arduino/avr/cores/arduino
-export BOARDS_TXT=/usr/share/arduino/hardware/arduino/avr/boards.txt
-export ARDUINO_VAR_PATH=/usr/share/arduino/hardware/arduino/avr/variants
-export BOOTLOADER_PARENT=/usr/share/arduino/hardware/arduino/avr/bootloaders
+export ARDUINO_CORE_PATH=/usr/share/arduino/hardware/archlinux-arduino/avr/cores/arduino
+export BOARDS_TXT=/usr/share/arduino/hardware/archlinux-arduino/avr/boards.txt
+export ARDUINO_VAR_PATH=/usr/share/arduino/hardware/archlinux-arduino/avr/variants
+export BOOTLOADER_PARENT=/usr/share/arduino/hardware/archlinux-arduino/avr/bootloaders
 export AVRDUDE_CONF=/etc/avrdude.conf
 export MONITOR_CMD=/home/baltazar/bin/monitor
 export ARDUINO_QUIET=1
@@ -93,9 +96,22 @@ zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
 alias tmus="tmux attach -t cmus"
 
-#source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+if [ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+  source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+  export ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
+
+  export ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#FFA500'
+  export ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#FFA500'
+  export ZSH_HIGHLIGHT_STYLES[globbing]='fg=cyan'
+  export ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=cyan'
+  export ZSH_HIGHLIGHT_STYLES[path]='fg=green'
+fi
 if [ -f /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh ]; then
   source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+
+  export HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND='underline'
+  export HISTORY_SUBSTRING_SEARCH_ENSURE_UNIQUE=1
 
   bindkey '^[[A' history-substring-search-up
   bindkey '^[[B' history-substring-search-down
