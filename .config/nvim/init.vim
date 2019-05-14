@@ -76,7 +76,6 @@ let g:ale_fixers = {
 \   'clang-format',
 \ ],
 \ 'html': [
-\   'tidy',
 \   'prettier',
 \ ],
 \}
@@ -95,6 +94,8 @@ autocmd FileType tex setlocal spell
 
 autocmd FileType python setlocal foldmethod=indent
 let g:python_recommended_style=0
+
+let g:load_doxygen_syntax=1
 
 command! W write suda://%
 command! E edit suda://%

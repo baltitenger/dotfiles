@@ -26,7 +26,6 @@ export LESSOPEN="| /usr/bin/src-hilite-lesspipe.sh %s"
 export LESS='-R '
 alias ls='ls -v --color=auto'
 alias grep='grep --color=auto'
-export PS1='%B%F{%(!.red.green)}%n%F{cyan}@%F{yellow}%m%f:%F{blue}%1~%F{%(?.green.red)}%(#.#.$)%f%b '
 alias pacdiff='sudo DIFFPROG="/usr/bin/nvim -d" DIFFSEARCHPATH="/boot /etc /usr" pacdiff'
 alias sudo='sudo '
 alias ytdl="youtube-dl --add-metadata -i -o '%(title)s.%(ext)s'"
@@ -95,6 +94,14 @@ eval $(dircolors)
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
 alias tmus="tmux attach -t cmus"
+
+setopt prompt_subst
+autoload -Uz vcs_info
+zstyle ':vcs_info:*' actionformats '%F{magenta}[%F{green}%b%F{yellow}|%F{red}%a%F{magenta}]%f'
+zstyle ':vcs_info:*' formats '%F{magenta}[%F{green}%b%F{magenta}]%f'
+zstyle ':vcs_info:*' enable git cvs svn
+
+export PS1='%B%F{%(!.red.green)}%n%F{cyan}@%F{yellow}%m%f:%F{blue}%1~%b$(vcs_info && echo ${vcs_info_msg_0_})%B%F{%(?.green.red)}%(#.#.$)%f%b '
 
 if [ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
   source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
