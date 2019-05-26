@@ -68,6 +68,7 @@ call plug#begin('~/.local/share/nvim/plugged')
   Plug 'majutsushi/tagbar', { 'on_cmd' : 'TagbarToggle' }
   Plug 'sakhnik/nvim-gdb', { 'do': ':!./install.sh \| UpdateRemotePlugins' }
   Plug 'vim-scripts/DoxygenToolkit.vim'
+  Plug 'itchyny/screensaver.vim'
 "  Plug 'aurieh/discord.nvim', { 'do': ':silent UpdateRemotePlugins'}
 call plug#end()
 

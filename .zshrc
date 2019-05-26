@@ -32,9 +32,9 @@ alias ytdl="youtube-dl --add-metadata -i -o '%(title)s.%(ext)s'"
 alias ccat="source-highlight-esc.sh"
 
 export EDITOR='/usr/bin/nvim'
-export PAGER='less'
-export BROWSER='opera'
-export PDFVIEWER='okular'
+export PAGER='/usr/bin/less'
+export BROWSER='/usr/bin/opera'
+export PDFVIEWER='/usr/bin/okular'
 
 autoload -Uz add-zsh-hook
 function set-title-precmd() {
@@ -101,7 +101,8 @@ zstyle ':vcs_info:*' actionformats '%F{magenta}[%F{green}%b%F{yellow}|%F{red}%a%
 zstyle ':vcs_info:*' formats '%F{magenta}[%F{green}%b%F{magenta}]%f'
 zstyle ':vcs_info:*' enable git cvs svn
 
-export PS1='%B%F{%(!.red.green)}%n%F{cyan}@%F{yellow}%m%f:%F{blue}%1~%b$(vcs_info && echo ${vcs_info_msg_0_})%B%F{%(?.green.red)}%(#.#.$)%f%b '
+export PS1='%B%F{%(!.red.green)}%n%F{cyan}@%F{yellow}%m%f:%F{blue}%1~%b$(vcs_info)${vcs_info_msg_0_}%B%F{%(?.green.red)}%(#.#.$)%f%b '
+export PS2='%_[$(( $(print -Pn $PS1 | sed "s/\[[0-9;]*m//g" | wc -c) - 2 ))C> '
 
 if [ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
   source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
