@@ -22,35 +22,34 @@ compinit
 
 alias config="/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME"
 
+export CC=/usr/bin/clang
+export CXX=/usr/bin/clang++
 export LESSOPEN="| /usr/bin/src-hilite-lesspipe.sh %s"
 export LESS='-R '
 alias ls='ls -v --color=auto'
 alias grep='grep --color=auto'
 alias pacdiff='sudo DIFFPROG="/usr/bin/nvim -d" DIFFSEARCHPATH="/boot /etc /usr" pacdiff'
 alias sudo='sudo '
-alias ytdl="youtube-dl --add-metadata -i -o '%(title)s.%(ext)s'"
-alias ccat="source-highlight-esc.sh"
-
-export EDITOR='/usr/bin/nvim'
-export PAGER='/usr/bin/less'
-export BROWSER='/usr/bin/opera'
-export PDFVIEWER='/usr/bin/okular'
-
-autoload -Uz add-zsh-hook
-function set-title-precmd() {
-  echo -n "\e]2;$USER@$HOST:`basename "${PWD/#$HOME/~}"`\a"
-}
-add-zsh-hook precmd set-title-precmd
-
-bindkey -v
-bindkey '^R' history-incremental-search-backward
+alias ytdl='noglob youtube-dl --add-metadata -i -o "%(title)s.%(ext)s"'
+alias ccat='source-highlight-esc.sh'
+alias make='make -j$(nproc)'
+alias cmake='cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON'
+alias tmus="tmux attach -t cmus"
 
 alias gpgupdatetty="gpg-connect-agent updatestartuptty /bye > /dev/null"
 gpgupdatetty
 
-alias ssh="gpgupdatetty && ssh"
-alias scp="gpgupdatetty && scp"
+#alias ssh="gpgupdatetty && ssh"
+#alias scp="gpgupdatetty && scp"
 
+export EDITOR='nvim'
+export PAGER='less'
+export MANPAGER='nvim +Man!'
+export BROWSER='surf-open'
+export PDFVIEWER='okular'
+
+bindkey -v
+bindkey '^R'      history-incremental-search-backward
 bindkey ""      backward-delete-char
 bindkey ""      backward-kill-word
 bindkey ""      backward-kill-word
@@ -71,7 +70,7 @@ setopt HIST_IGNORE_DUPS
 setopt HIST_IGNORE_SPACE
 setopt NO_HUP
 zmodload zsh/mathfunc
-autoload -U zmv
+autoload -U zmv zcalc
 
 yay() {
   command yay $@ && rehash
@@ -93,7 +92,11 @@ export ARDUINO_QUIET=1
 eval $(dircolors)
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
-alias tmus="tmux attach -t cmus"
+autoload -Uz add-zsh-hook
+function set-title-precmd() {
+  echo -n "\e]2;$USER@$HOST:`basename "${PWD/#$HOME/~}"`\a"
+}
+add-zsh-hook precmd set-title-precmd
 
 setopt prompt_subst
 autoload -Uz vcs_info
@@ -101,28 +104,37 @@ zstyle ':vcs_info:*' actionformats '%F{magenta}[%F{green}%b%F{yellow}|%F{red}%a%
 zstyle ':vcs_info:*' formats '%F{magenta}[%F{green}%b%F{magenta}]%f'
 zstyle ':vcs_info:*' enable git cvs svn
 
-export PS1='%B%F{%(!.red.green)}%n%F{cyan}@%F{yellow}%m%f:%F{blue}%1~%b$(vcs_info)${vcs_info_msg_0_}%B%F{%(?.green.red)}%(#.#.$)%f%b '
+export PS1='%B%F{%(!.red.green)}%n%F{cyan}@%F{yellow}%m%f:%F{blue}%1~%b$(vcs_info && echo ${vcs_info_msg_0_})%1(j.<%j>.)%B%F{%(?.green.red)}%(#.#.$)%f%b '
 export PS2='%_[$(( $(print -Pn $PS1 | sed "s/\[[0-9;]*m//g" | wc -c) - 2 ))C> '
 
-if [ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
-  source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-
-  export ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
-
-  export ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#FFA500'
-  export ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#FFA500'
-  export ZSH_HIGHLIGHT_STYLES[globbing]='fg=cyan'
-  export ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=cyan'
-  export ZSH_HIGHLIGHT_STYLES[path]='fg=green'
+# Antigen stuff
+export ADOTDIR="$HOME/.local/share/zsh/antigen"
+if [ ! -f "$ADOTDIR/antigen.zsh" ]; then
+  curl -fLo "$ADOTDIR/antigen.zsh" --create-dirs "https://git.io/antigen"
 fi
-if [ -f /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh ]; then
-  source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+source "$ADOTDIR/antigen.zsh"
+antigen bundle "zsh-users/zsh-completions"
+antigen bundle "zsh-users/zsh-history-substring-search"
+antigen bundle "zsh-users/zsh-syntax-highlighting"
+antigen bundle "knu/zsh-manydots-magic"
+antigen apply
 
-  export HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND='underline'
-  export HISTORY_SUBSTRING_SEARCH_ENSURE_UNIQUE=1
+autoload -Uz manydots-magic && manydots-magic
 
-  bindkey '^[[A' history-substring-search-up
-  bindkey '^[[B' history-substring-search-down
-  bindkey -M vicmd 'k' history-substring-search-up
-  bindkey -M vicmd 'j' history-substring-search-down
-fi
+# zsh-syntax-highlighting config
+export ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
+
+export ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#FFA500'
+export ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#FFA500'
+export ZSH_HIGHLIGHT_STYLES[globbing]='fg=cyan'
+export ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=cyan'
+export ZSH_HIGHLIGHT_STYLES[path]='fg=green'
+
+# zsh-history-substring-search config
+export HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND='underline'
+export HISTORY_SUBSTRING_SEARCH_ENSURE_UNIQUE=1
+
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
+bindkey -M vicmd 'k' history-substring-search-up
+bindkey -M vicmd 'j' history-substring-search-down

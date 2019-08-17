@@ -6,7 +6,7 @@
 #cell_width_scale = 1.0
 clickable_url = false
 #dynamic_title = true
-font = Noto Sans Mono 11
+font = Noto Sans Mono 12
 #fullscreen = true
 #icon_name = terminal
 mouse_autohide = true
@@ -35,7 +35,7 @@ scrollback_lines = 10000
 #modify_other_keys = false
 
 # set size hints for the window
-#size_hints = false
+#size_hints = true
 
 # "off", "left" or "right"
 #scrollbar = off
@@ -52,6 +52,7 @@ scrollback_lines = 10000
 
 # 20% background transparency (requires a compositor)
 #background = rgba(63, 63, 63, 0.8)
+background = rgba(0, 0, 0, 0.8)
 
 # If unset, will reverse foreground and background
 highlight = #2f2f2f

@@ -7,6 +7,7 @@ set modeline
 set undofile
 set scrolloff=3
 set title
+set ignorecase smartcase
 autocmd BufWritePre /tmp/* setlocal noundofile
 set path+=**
 let g:netrw_banner=0
@@ -16,8 +17,16 @@ if $TERM isnot# 'linux'
   set termguicolors
 endif
 
-highlight Folded ctermbg=0 guibg=Black
+highlight Folded NONE ctermfg=14 guifg=Cyan
 highlight Visual guibg =#403d3d
+highlight ErrorMsg ctermbg=1 guibg=DarkRed
+highlight Error ctermbg=1 guibg=DarkRed
+highlight ErrorText guisp=Red gui=undercurl
+highlight Warning ctermfg=0 ctermbg=11 guifg=Blue guibg=Yellow
+highlight WarningText guisp=Yellow gui=undercurl
+highlight Info ctermfg=12 guifg=Cyan
+highlight Pmenu ctermbg=6 guibg=DarkMagenta
+highlight PmenuSel ctermfg=0 ctermbg=13 guifg=Blue guibg=Magenta
 
 "Go to last position
 autocmd BufReadPost *
@@ -27,7 +36,7 @@ autocmd BufReadPost *
 
 autocmd BufReadPost *
   \ if filereadable("CMakeLists.txt")
-  \ |   set makeprg=make\ -Cbuild\ -j$(nproc)
+  \ |   setlocal makeprg=make\ -s\ -Cbuild\ -j$(nproc)
   \ | endif
 
 nmap <Leader>/ :noh<CR>
@@ -47,20 +56,21 @@ nnoremap <A-j> <C-w>j
 nnoremap <A-k> <C-w>k
 nnoremap <A-l> <C-w>l
 
-nnoremap <leader>f :ALEFix<CR>
-
 "Install Plug if not found
-if empty(glob('~/.local/share/nvim/site/autoload/plug.vim'))
-  silent !curl -fLo '~/.local/share/nvim/site/autoload/plug.vim' --create-dirs
+if empty(glob("$HOME/.local/share/nvim/site/autoload/plug.vim"))
+  silent !curl -fLo "$HOME/.local/share/nvim/site/autoload/plug.vim" --create-dirs
     \ 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
 call plug#begin('~/.local/share/nvim/plugged')
-  Plug 'w0rp/ale'
-  Plug 'arakashic/chromatica.nvim', { 'do': ':silent UpdateRemotePlugins'}
+  "Plug 'arakashic/chromatica.nvim', { 'do': ':silent UpdateRemotePlugins'}
+  Plug 'octol/vim-cpp-enhanced-highlight'
   Plug 'Shougo/deoplete.nvim', { 'do': ':silent UpdateRemotePlugins'}
-  Plug 'Shougo/neoinclude.vim'
+  Plug 'autozimu/LanguageClient-neovim', {
+    \ 'branch': 'next',
+    \ 'do': 'bash install.sh',
+    \ }
   Plug 'lervag/vimtex'
   Plug 'lambdalisue/gina.vim'
   Plug 'lambdalisue/suda.vim'
@@ -69,27 +79,74 @@ call plug#begin('~/.local/share/nvim/plugged')
   Plug 'sakhnik/nvim-gdb', { 'do': ':!./install.sh \| UpdateRemotePlugins' }
   Plug 'vim-scripts/DoxygenToolkit.vim'
   Plug 'itchyny/screensaver.vim'
-"  Plug 'aurieh/discord.nvim', { 'do': ':silent UpdateRemotePlugins'}
+  Plug 'crucerucalin/qml.vim'
 call plug#end()
 
-let g:ale_fixers = {
-\ 'cpp': [
-\   'clang-format',
-\ ],
-\ 'html': [
-\   'prettier',
-\ ],
-\}
+let g:cpp_class_scope_highlight = 1
+let g:cpp_member_variable_highlight = 1
+let g:cpp_class_decl_highlight = 1
+"let g:cpp_experimental_simple_template_highlight = 1
+let g:cpp_experimental_template_highlight = 1
+let g:cpp_concepts_highlight = 1
 
-"let g:deoplete#enable_at_startup = 1
+function LC_maps()
+  if has_key(g:LanguageClient_serverCommands, &filetype)
+    set formatexpr=LanguageClient#textDocument_rangeFormatting_sync()
+    nnoremap <buffer> <silent> gh :call LanguageClient#textDocument_hover()<CR>
+    nnoremap <buffer> <silent> gd :call LanguageClient#textDocument_definition()<CR>
+    nnoremap <buffer> <silent> gr :call LanguageClient#textDocument_rename()<CR>
+    nnoremap <buffer> <silent> <leader>f :call LanguageClient_textDocument_formatting()<CR>
+  endif
+endfunction
+
+autocmd FileType * call LC_maps()
+
+let g:LanguageClient_serverCommands = {
+  \ 'cpp': ['clangd'],
+  \ }
+
+let g:LanguageClient_diagnosticsDisplay = {
+\   1: {
+\     "name": "Error",
+\     "texthl": "ErrorText",
+\     "signText": "✖",
+\     "signTexthl": "Error",
+\     "virtualTexthl": "Error",
+\   },
+\   2: {
+\     "name": "Warning",
+\     "texthl": "WarningText",
+\     "signText": "!",
+\     "signTexthl": "Warning",
+\     "virtualTexthl": "Warning",
+\   },
+\   3: {
+\     "name": "Information",
+\     "texthl": "Normal",
+\     "signText": "ℹ",
+\     "signTexthl": "Info",
+\     "virtualTexthl": "Info",
+\   },
+\   4: {
+\     "name": "Hint",
+\     "texthl": "Normal",
+\     "signText": "➤",
+\     "signTexthl": "Info",
+\     "virtualTexthl": "Info",
+\   },
+\ }
+
+let g:deoplete#enable_at_startup = 1
 silent! call deoplete#custom#option('smart_case', v:true)
 
-let g:chromatica#enable_at_startup = 1
-let g:chromatica#responsive_mode = 1
+"let g:chromatica#enable_at_startup = 1
+"let g:chromatica#responsive_mode = 1
 
 let g:tex_comment_nospell = 1
 let g:tex_fold_enabled = 1
-let g:vimtex_compiler_latexmk = {'build_dir': 'build'}
+let g:vimtex_compiler_latexmk = {
+      \ 'build_dir': 'build',
+      \ }
 let g:vimtex_compiler_latexmk_engines = {'_': '-lualatex'}
 autocmd FileType tex setlocal spell
 
