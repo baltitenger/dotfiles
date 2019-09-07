@@ -33,7 +33,7 @@ alias sudo='sudo '
 alias ytdl='noglob youtube-dl --add-metadata -i -o "%(title)s.%(ext)s"'
 alias ccat='source-highlight-esc.sh'
 alias make='make -j$(nproc)'
-alias cmake='cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON'
+# alias cmake='cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON'
 alias tmus="tmux attach -t cmus"
 
 alias gpgupdatetty="gpg-connect-agent updatestartuptty /bye > /dev/null"
@@ -104,7 +104,7 @@ zstyle ':vcs_info:*' actionformats '%F{magenta}[%F{green}%b%F{yellow}|%F{red}%a%
 zstyle ':vcs_info:*' formats '%F{magenta}[%F{green}%b%F{magenta}]%f'
 zstyle ':vcs_info:*' enable git cvs svn
 
-export PS1='%B%F{%(!.red.green)}%n%F{cyan}@%F{yellow}%m%f:%F{blue}%1~%b$(vcs_info && echo ${vcs_info_msg_0_})%1(j.<%j>.)%B%F{%(?.green.red)}%(#.#.$)%f%b '
+export PS1='%B%F{%(!.red.green)}%n%F{cyan}@%F{yellow}%m%f:%F{blue}%1~%b$(vcs_info && echo ${vcs_info_msg_0_})%f%b%1(j.<%j>.)%B%F{%(?.green.red)}%(#.#.$)%f%b '
 export PS2='%_[$(( $(print -Pn $PS1 | sed "s/\[[0-9;]*m//g" | wc -c) - 2 ))C> '
 
 # Antigen stuff
