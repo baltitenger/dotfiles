@@ -11,6 +11,7 @@ set ignorecase smartcase
 autocmd BufWritePre /tmp/* setlocal noundofile
 set path+=**
 let g:netrw_banner=0
+set conceallevel=2 concealcursor=niv
 
 "Enable fancy colors
 if $TERM isnot# 'linux'
@@ -80,7 +81,13 @@ call plug#begin('~/.local/share/nvim/plugged')
   Plug 'vim-scripts/DoxygenToolkit.vim'
   Plug 'itchyny/screensaver.vim'
   Plug 'crucerucalin/qml.vim'
+  Plug 'Shougo/neosnippet.vim'
+  Plug 'Shougo/neosnippet-snippets'
 call plug#end()
+
+imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+smap <C-k>     <Plug>(neosnippet_expand_or_jump)
+xmap <C-k>     <Plug>(neosnippet_expand_target)
 
 let g:cpp_class_scope_highlight = 1
 let g:cpp_member_variable_highlight = 1
@@ -102,7 +109,11 @@ endfunction
 autocmd FileType * call LC_maps()
 
 let g:LanguageClient_serverCommands = {
-  \ 'cpp': ['clangd'],
+  \ 'cpp':  ['clangd'],
+  \ 'c':    ['clangd'],
+  \ 'json': ['json-languageserver'],
+  \ 'html': ['html-languageserver'],
+  \ 'css':  ['css-languageserver'],
   \ }
 
 let g:LanguageClient_diagnosticsDisplay = {
