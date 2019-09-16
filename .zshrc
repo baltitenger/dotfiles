@@ -44,7 +44,7 @@ gpgupdatetty
 
 export EDITOR='nvim'
 export PAGER='less'
-export MANPAGER='nvim +Man!'
+export MANPAGER="nvim -c 'set ft=man nomod nolist' -"
 export BROWSER='surf-open'
 export PDFVIEWER='okular'
 
