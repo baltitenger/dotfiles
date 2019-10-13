@@ -32,9 +32,10 @@ alias pacdiff='sudo DIFFPROG="/usr/bin/nvim -d" DIFFSEARCHPATH="/boot /etc /usr"
 alias sudo='sudo '
 alias ytdl='noglob youtube-dl --add-metadata -i -o "%(title)s.%(ext)s"'
 alias ccat='source-highlight-esc.sh'
-alias make='make -j$(nproc)'
+alias make='make -sj$(nproc)'
 # alias cmake='cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON'
 alias tmus="tmux attach -t cmus"
+alias vi="$EDITOR"
 
 alias gpgupdatetty="gpg-connect-agent updatestartuptty /bye > /dev/null"
 gpgupdatetty
@@ -42,11 +43,11 @@ gpgupdatetty
 #alias ssh="gpgupdatetty && ssh"
 #alias scp="gpgupdatetty && scp"
 
-export EDITOR='nvim'
-export PAGER='less'
+export EDITOR='/usr/bin/nvim'
+export PAGER='/usr/bin/less'
 export MANPAGER="nvim -c 'set ft=man nomod nolist' -"
 export BROWSER='surf-open'
-export PDFVIEWER='okular'
+export PDFVIEWER='/usr/bin/okular'
 
 bindkey -v
 bindkey '^R'      history-incremental-search-backward
@@ -83,6 +84,8 @@ export AVR_TOOLS_DIR=/usr
 export ARDUINO_CORE_PATH=/usr/share/arduino/hardware/archlinux-arduino/avr/cores/arduino
 export BOARDS_TXT=/usr/share/arduino/hardware/archlinux-arduino/avr/boards.txt
 export ARDUINO_VAR_PATH=/usr/share/arduino/hardware/archlinux-arduino/avr/variants
+export ARDUINO_LIB_PATH=/usr/share/arduino/hardware/archlinux-arduino/avr/libraries
+export USER_LIB_PATH=/home/baltazar/Arduino/libraries
 export BOOTLOADER_PARENT=/usr/share/arduino/hardware/archlinux-arduino/avr/bootloaders
 export AVRDUDE_CONF=/etc/avrdude.conf
 export MONITOR_CMD=/home/baltazar/bin/monitor
@@ -138,3 +141,5 @@ bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 bindkey -M vicmd 'k' history-substring-search-up
 bindkey -M vicmd 'j' history-substring-search-down
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

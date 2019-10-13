@@ -11,7 +11,9 @@ set ignorecase smartcase
 autocmd BufWritePre /tmp/* setlocal noundofile
 set path+=**
 let g:netrw_banner=0
-set conceallevel=2 concealcursor=niv
+set autowrite
+set makeprg=make\ -s\ -j$(nproc)
+set linebreak
 
 "Enable fancy colors
 if $TERM isnot# 'linux'
@@ -149,6 +151,9 @@ let g:LanguageClient_diagnosticsDisplay = {
 
 let g:deoplete#enable_at_startup = 1
 silent! call deoplete#custom#option('smart_case', v:true)
+call deoplete#custom#source('LanguageClient',
+            \ 'min_pattern_length',
+            \ 2)
 
 "let g:chromatica#enable_at_startup = 1
 "let g:chromatica#responsive_mode = 1
