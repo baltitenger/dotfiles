@@ -15,6 +15,9 @@
 !.config/termite/config
 !.config/yay/
 !.config/yay/config.json
+!.config/zsh/
+!.config/zsh/.plugins.txt
+!.config/zsh/.zshrc
 !.gitignore
 !.local/
 !.local/bin
@@ -25,4 +28,3 @@
 !.tmux.conf
 !.toprc
 !.zprofile
-!.zshrc

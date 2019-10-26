@@ -9,9 +9,7 @@ case "$1" in
     import -window $(xwininfo | grep -o "0x\w*" | head -1) $file
     ;;
   *) # rectangular region
-    qdbus org.kde.KWin /Compositor org.kde.kwin.Compositing.suspend
     import $file
-    qdbus org.kde.KWin /Compositor org.kde.kwin.Compositing.resume
     ;;
 esac
 xclip -sel clip -t image/png -i /tmp/screenshot.png
