@@ -5,12 +5,15 @@ export EDITOR='/usr/bin/nvim'
 export LESS='-R '
 export LESSOPEN='| /usr/bin/src-hilite-lesspipe.sh %s'
 export MANPAGER="/usr/bin/nvim -c 'set ft=man nomod nolist' -"
+export PACKAGER='Baltazár Radics <baltazar.radics@gmail.com>' # for makepkg
 export PAGER='/usr/bin/less'
 export PDFVIEWER='/usr/bin/okular'
+export TERMINFO="$HOME/.config/terminfo"
 eval $(dircolors)
 
 alias ccat='source-highlight-esc.sh'
 alias config="git --git-dir=$HOME/.cfg/ --work-tree=$HOME"
+alias getantibody="curl -fL https://git.io/antibody | sh -s - -b $HOME/.local/bin"
 alias gpgfix='gpg-connect-agent updatestartuptty /bye >/dev/null'
 alias grep='grep --color=auto'
 alias ls='ls -v --color=auto'
@@ -27,12 +30,15 @@ zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character t
 zstyle ':completion:*' matcher-list '' '+m:{[:lower:]}={[:upper:]}' '+r:|[._-]=** r:|=**' '+l:|=* r:|=*'
 zstyle ':completion:*' max-errors 3
 zstyle ':completion:*' menu select=long
+zstyle ':completion:*' rehash true
 zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
 
 zstyle ':vcs_info:*' actionformats '%F{magenta}[%F{green}%b%F{yellow}|%F{red}%a%F{magenta}]%f'
 zstyle ':vcs_info:*' enable git cvs svn
 zstyle ':vcs_info:*' formats '%F{magenta}[%F{green}%b%F{magenta}]%f'
-autoload -Uz vcs_info
+
+autoload -Uz vcs_info zmv zcalc
+zmodload zsh/mathfunc
 
 function precmd() {
   # title
@@ -41,14 +47,6 @@ function precmd() {
   PS1='%B%F{%(!.red.green)}%n%F{cyan}@%F{yellow}%m%f:%F{blue}%1~%b'"$(vcs_info && echo ${vcs_info_msg_0_})"'%f%b%1(j.<%j>.)%B%F{%(?.green.red)}%(#.#.$)%f%b '
   PS2='%_['"$(( $(print -Pn $PS1 | sed 's/\[[0-9;]*m//g' | wc -c) - 2 ))"'C> '
 }
-
-# TODO
-function yay() {
-  command yay $@ && rehash
-}
-
-autoload -Uz zmv zcalc
-zmodload zsh/mathfunc
 
 bindkey -v
 bindkey ''      backward-kill-word
@@ -78,7 +76,6 @@ setopt notify
 
 # plugins
 repeat 1; do
-  alias getantibody="curl -fL https://git.io/antibody | sh -s - -b $HOME/.local/bin"
   if which antibody >/dev/null; then; else
     echo "Installing antibody..."
     getantibody || break
@@ -106,6 +103,11 @@ repeat 1; do
   bindkey -M vicmd 'j' history-substring-search-down
   bindkey -M vicmd 'k' history-substring-search-up
 done
+
+termite_terminfo="x/xterm-termite"
+if [[ \( ! -f "/usr/share/terminfo/$termite_terminfo" \) && \( ! -f "$TERMINFO/$termite_terminfo" \) ]]; then
+  curl -fL 'https://raw.githubusercontent.com/thestinger/termite/master/termite.terminfo' | tic -x -
+fi
 
 autoload -Uz compinit && compinit
 if [[ ! "$ZDOTDIR/.zcompdump.zwc" -nt "$ZDOTDIR/.zcompdump" ]]; then
