@@ -104,7 +104,7 @@ repeat 1; do
 done
 
 if [[ "$TERM" == "xterm-termite" && ( ! -f "/usr/share/terminfo/x/xterm-termite" ) && ( ! -f "$HOME/.config/terminfo/x/xterm-termite" ) ]]; then
-  curl -fL 'https://raw.githubusercontent.com/thestinger/termite/master/termite.terminfo' | TERMINFO="$HOME/.config/terminfo" tic -x -
+  curl -fL 'https://raw.githubusercontent.com/thestinger/termite/master/termite.terminfo' | tic -xo"$HOME/.config/terminfo" -
 fi
 export TERMINFO="$HOME/.config/terminfo"
 
