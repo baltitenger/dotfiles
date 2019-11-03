@@ -105,7 +105,7 @@ repeat 1; do
 done
 
 termite_terminfo="x/xterm-termite"
-if [[ \( ! -f "/usr/share/terminfo/$termite_terminfo" \) && \( ! -f "$TERMINFO/$termite_terminfo" \) ]]; then
+if [[ ( ! -f "/usr/share/terminfo/$termite_terminfo" ) && ( ! -f "$TERMINFO/$termite_terminfo" ) ]]; then
   curl -fL 'https://raw.githubusercontent.com/thestinger/termite/master/termite.terminfo' | tic -x -
 fi
 
