@@ -8,7 +8,6 @@ export MANPAGER="/usr/bin/nvim -c 'set ft=man nomod nolist' -"
 export PACKAGER='Baltazár Radics <baltazar.radics@gmail.com>' # for makepkg
 export PAGER='/usr/bin/less'
 export PDFVIEWER='/usr/bin/okular'
-export TERMINFO="$HOME/.config/terminfo"
 eval $(dircolors)
 
 alias ccat='source-highlight-esc.sh'
@@ -104,10 +103,10 @@ repeat 1; do
   bindkey -M vicmd 'k' history-substring-search-up
 done
 
-termite_terminfo="x/xterm-termite"
-if [[ ( ! -f "/usr/share/terminfo/$termite_terminfo" ) && ( ! -f "$TERMINFO/$termite_terminfo" ) ]]; then
-  curl -fL 'https://raw.githubusercontent.com/thestinger/termite/master/termite.terminfo' | tic -x -
+if [[ "$TERM" == "xterm-termite" && ( ! -f "/usr/share/terminfo/x/xterm-termite" ) && ( ! -f "$HOME/.config/terminfo/x/xterm-termite" ) ]]; then
+  curl -fL 'https://raw.githubusercontent.com/thestinger/termite/master/termite.terminfo' | TERMINFO="$HOME/.config/terminfo" tic -x -
 fi
+export TERMINFO="$HOME/.config/terminfo"
 
 autoload -Uz compinit && compinit
 if [[ ! "$ZDOTDIR/.zcompdump.zwc" -nt "$ZDOTDIR/.zcompdump" ]]; then

@@ -1,35 +1,25 @@
-set expandtab shiftwidth=2 smarttab
-set showmatch
-set clipboard+=unnamed
-set mouse=a
-set foldmethod=syntax foldlevelstart=99
-set modeline
-set undofile
-set scrolloff=3
-set title
-set ignorecase smartcase
-autocmd BufWritePre /tmp/* setlocal noundofile
-set path+=**
-let g:netrw_banner=0
 set autowrite
-set makeprg=make\ -s\ -j$(nproc)
+set clipboard+=unnamed
+set expandtab shiftwidth=2 smarttab
+set foldmethod=syntax foldlevelstart=99
+set ignorecase smartcase
 set linebreak
+set makeprg=make\ -s\ -j$(nproc)
+set modeline
+set mouse=a
+set path+=**
+set scrolloff=3
+set showmatch
+set title
+set undofile
+
+autocmd BufWritePre /tmp/* setlocal noundofile
+let g:netrw_banner=0
 
 "Enable fancy colors
 if $TERM isnot# 'linux'
   set termguicolors
 endif
-
-highlight Folded NONE ctermfg=14 guifg=Cyan
-highlight Visual guibg =#403d3d
-highlight ErrorMsg ctermbg=1 guibg=DarkRed
-highlight Error ctermbg=1 guibg=DarkRed
-highlight ErrorText guisp=Red gui=undercurl
-highlight Warning ctermfg=0 ctermbg=11 guifg=Blue guibg=Yellow
-highlight WarningText guisp=Yellow gui=undercurl
-highlight Info ctermfg=12 guifg=Cyan
-highlight Pmenu ctermbg=6 guibg=DarkMagenta
-highlight PmenuSel ctermfg=0 ctermbg=13 guifg=Blue guibg=Magenta
 
 "Go to last position
 autocmd BufReadPost *
@@ -60,7 +50,7 @@ nnoremap <A-k> <C-w>k
 nnoremap <A-l> <C-w>l
 
 "Install Plug if not found
-if empty(glob("$HOME/.local/share/nvim/site/autoload/plug.vim"))
+if empty(glob(stdpath("data")."/site/autoload/plug.vim"))
   silent !curl -fLo "$HOME/.local/share/nvim/site/autoload/plug.vim" --create-dirs
     \ 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
@@ -85,7 +75,19 @@ call plug#begin('~/.local/share/nvim/plugged')
   Plug 'crucerucalin/qml.vim'
   Plug 'Shougo/neosnippet.vim'
   Plug 'Shougo/neosnippet-snippets'
+  Plug 'junegunn/vim-easy-align'
 call plug#end()
+
+xmap ga <Plug>(EasyAlign)
+nmap ga <Plug>(EasyAlign)
+let g:easy_align_delimiters = {
+\   '/': {
+\     'pattern':         '//\+\|/\*\|\*/',
+\     'delimiter_align': 'l',
+\     'ignore_groups':   ['!Comment']
+\   },
+\ }
+autocmd FileType markdown imap <Bar> <Bar><Esc>m`gaip*<Bar>``A
 
 imap <C-k>     <Plug>(neosnippet_expand_or_jump)
 smap <C-k>     <Plug>(neosnippet_expand_or_jump)
@@ -101,6 +103,7 @@ let g:cpp_concepts_highlight = 1
 function! LC_maps()
   if has_key(g:LanguageClient_serverCommands, &filetype)
     set formatexpr=LanguageClient#textDocument_rangeFormatting_sync()
+    nnoremap <buffer> <silent> ge :call LanguageClient#explainErrorAtPoint()<CR>
     nnoremap <buffer> <silent> gh :call LanguageClient#textDocument_hover()<CR>
     nnoremap <buffer> <silent> gd :call LanguageClient#textDocument_definition()<CR>
     nnoremap <buffer> <silent> gr :call LanguageClient#textDocument_rename()<CR>
@@ -129,7 +132,7 @@ let g:LanguageClient_diagnosticsDisplay = {
 \   2: {
 \     "name": "Warning",
 \     "texthl": "WarningText",
-\     "signText": "!",
+\     "signText": "⚠",
 \     "signTexthl": "Warning",
 \     "virtualTexthl": "Warning",
 \   },
@@ -152,8 +155,22 @@ let g:LanguageClient_diagnosticsDisplay = {
 let g:deoplete#enable_at_startup = 1
 silent! call deoplete#custom#option('smart_case', v:true)
 call deoplete#custom#source('LanguageClient',
-            \ 'min_pattern_length',
-            \ 2)
+\ 'min_pattern_length',
+\ 2)
+
+call deoplete#custom#var('omni',
+\ 'input_patterns', {
+\   'tex': g:vimtex#re#deoplete
+\ })
+
+call deoplete#custom#option('sources', {
+\   'tex': ['omni'],
+\   'cpp': ['LanguageClient', 'buffer'],
+\ })
+
+"call deoplete#custom#var('omni', 'input_patterns', {
+"\   'tex': g:vimtex#re#deoplete
+"\ })
 
 "let g:chromatica#enable_at_startup = 1
 "let g:chromatica#responsive_mode = 1
@@ -170,6 +187,17 @@ autocmd FileType python setlocal foldmethod=indent
 let g:python_recommended_style=0
 
 let g:load_doxygen_syntax=1
+
+highlight Folded NONE ctermfg=14 guifg=Cyan
+highlight Visual guibg =#403d3d
+highlight ErrorMsg ctermbg=1 guibg=DarkRed
+highlight Error ctermbg=1 guibg=DarkRed
+highlight ErrorText guisp=Red gui=undercurl
+highlight Warning ctermfg=0 ctermbg=11 guifg=Blue guibg=Yellow
+highlight WarningText guisp=Yellow gui=undercurl
+highlight Info ctermfg=12 guifg=Cyan
+highlight Pmenu ctermbg=6 guibg=DarkMagenta
+highlight PmenuSel ctermfg=0 ctermbg=13 guifg=Blue guibg=Magenta
 
 command! W write suda://%
 command! E edit suda://%
