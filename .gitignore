@@ -1,7 +1,8 @@
 *
 !.config
 !.config/cmus/
-!.config/cmus/autosave
+!.config/cmus/rc
+!.config/cmus/tmux.conf
 !.config/git/
 !.config/git/config
 !.config/git/ignore

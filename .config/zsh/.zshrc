@@ -19,7 +19,7 @@ alias ls='ls -v --color=auto'
 alias make="make -sj$(nproc)"
 alias pacdiff="sudo DIFFPROG='/usr/bin/nvim -d' DIFFSEARCHPATH='/boot /etc /usr' pacdiff"
 alias sudo='sudo '
-alias tmus='tmux attach -t cmus'
+alias tmus="tmux attach-session -t cmus 2>/dev/null || tmux -f '$HOME/.config/cmus/tmux.conf' new-session -s cmus 'cmus'"
 alias vi="$EDITOR"
 alias ytdl="noglob youtube-dl --add-metadata --audio-format m4a --ignore-errors --output '%(title)s.%(ext)s'"
 

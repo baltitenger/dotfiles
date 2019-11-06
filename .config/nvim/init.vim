@@ -181,6 +181,7 @@ let g:vimtex_compiler_latexmk = {
       \ 'build_dir': 'build',
       \ }
 let g:vimtex_compiler_latexmk_engines = {'_': '-lualatex'}
+let g:vimtex_view_general_viewer = 'llpp.inotify'
 autocmd FileType tex setlocal spell
 
 autocmd FileType python setlocal foldmethod=indent
