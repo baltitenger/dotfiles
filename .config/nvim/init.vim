@@ -13,24 +13,26 @@ set showmatch
 set title
 set undofile
 
-autocmd BufWritePre /tmp/* setlocal noundofile
-let g:netrw_banner=0
+command! DiffOrig vert new | set bt=nofile | r ++edit # | 0d_ | diffthis
+\ | wincmd p | diffthis
 
 "Enable fancy colors
 if $TERM isnot# 'linux'
   set termguicolors
 endif
 
-"Go to last position
-autocmd BufReadPost *
-  \ if line("'\"") > 1 && line("'\"") <= line("$") && &ft !~# 'commit'
-  \ |   exe "normal! g`\""
-  \ | endif
+let g:netrw_banner=0
+let g:tex_comment_nospell = 1
+let g:tex_fold_enabled = 1
+let g:python_recommended_style=0
 
+autocmd FileType tex setlocal spell
+autocmd FileType python setlocal foldmethod=indent
+autocmd BufWritePre /tmp/* setlocal noundofile
 autocmd BufReadPost *
-  \ if filereadable("CMakeLists.txt")
-  \ |   setlocal makeprg=make\ -s\ -Cbuild\ -j$(nproc)
-  \ | endif
+\ if line("'\"") > 1 && line("'\"") <= line("$") && &ft !~# 'commit'
+\ |   exe "normal! g`\""
+\ | endif
 
 nmap <Leader>/ :noh<CR>
 nmap Y y$
@@ -49,27 +51,23 @@ nnoremap <A-j> <C-w>j
 nnoremap <A-k> <C-w>k
 nnoremap <A-l> <C-w>l
 
-"Install Plug if not found
-if empty(glob(stdpath("data")."/site/autoload/plug.vim"))
-  silent !curl -fLo "$HOME/.local/share/nvim/site/autoload/plug.vim" --create-dirs
-    \ 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
-endif
-
-call plug#begin('~/.local/share/nvim/plugged')
+function! MyPlugins()
+call plug#begin(stdpath('data').'/plugged')
   "Plug 'arakashic/chromatica.nvim', { 'do': ':silent UpdateRemotePlugins'}
   Plug 'octol/vim-cpp-enhanced-highlight'
   Plug 'Shougo/deoplete.nvim', { 'do': ':silent UpdateRemotePlugins'}
   Plug 'autozimu/LanguageClient-neovim', {
-    \ 'branch': 'next',
-    \ 'do': 'bash install.sh',
-    \ }
+  \   'branch': 'next',
+  \   'do': 'bash install.sh',
+  \ }
   Plug 'lervag/vimtex'
   Plug 'lambdalisue/gina.vim'
   Plug 'lambdalisue/suda.vim'
   Plug 'mhinz/vim-signify'
   Plug 'majutsushi/tagbar', { 'on_cmd' : 'TagbarToggle' }
-  Plug 'sakhnik/nvim-gdb', { 'do': ':!./install.sh \| UpdateRemotePlugins' }
+  Plug 'sakhnik/nvim-gdb', {
+  \   'do': ':!./install.sh \| silent UpdateRemotePlugins',
+  \ }
   Plug 'vim-scripts/DoxygenToolkit.vim'
   Plug 'itchyny/screensaver.vim'
   Plug 'crucerucalin/qml.vim'
@@ -77,6 +75,9 @@ call plug#begin('~/.local/share/nvim/plugged')
   Plug 'Shougo/neosnippet-snippets'
   Plug 'junegunn/vim-easy-align'
 call plug#end()
+endfunction " MyPlugins
+
+function MyPluginSettings() " -------------------------------------------------
 
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
@@ -123,32 +124,32 @@ let g:LanguageClient_serverCommands = {
 
 let g:LanguageClient_diagnosticsDisplay = {
 \   1: {
-\     "name": "Error",
-\     "texthl": "ErrorText",
-\     "signText": "✖",
-\     "signTexthl": "Error",
-\     "virtualTexthl": "Error",
+\     'name': 'Error',
+\     'texthl': 'ErrorText',
+\     'signText': '✖',
+\     'signTexthl': 'Error',
+\     'virtualTexthl': 'Error',
 \   },
 \   2: {
-\     "name": "Warning",
-\     "texthl": "WarningText",
-\     "signText": "⚠",
-\     "signTexthl": "Warning",
-\     "virtualTexthl": "Warning",
+\     'name': 'Warning',
+\     'texthl': 'WarningText',
+\     'signText': '⚠',
+\     'signTexthl': 'Warning',
+\     'virtualTexthl': 'Warning',
 \   },
 \   3: {
-\     "name": "Information",
-\     "texthl": "Normal",
-\     "signText": "ℹ",
-\     "signTexthl": "Info",
-\     "virtualTexthl": "Info",
+\     'name': 'Information',
+\     'texthl': 'Normal',
+\     'signText': 'ℹ',
+\     'signTexthl': 'Info',
+\     'virtualTexthl': 'Info',
 \   },
 \   4: {
-\     "name": "Hint",
-\     "texthl": "Normal",
-\     "signText": "➤",
-\     "signTexthl": "Info",
-\     "virtualTexthl": "Info",
+\     'name': 'Hint',
+\     'texthl': 'Normal',
+\     'signText': '➤',
+\     'signTexthl': 'Info',
+\     'virtualTexthl': 'Info',
 \   },
 \ }
 
@@ -168,26 +169,19 @@ call deoplete#custom#option('sources', {
 \   'cpp': ['LanguageClient', 'buffer'],
 \ })
 
-"call deoplete#custom#var('omni', 'input_patterns', {
-"\   'tex': g:vimtex#re#deoplete
-"\ })
-
 "let g:chromatica#enable_at_startup = 1
 "let g:chromatica#responsive_mode = 1
 
-let g:tex_comment_nospell = 1
-let g:tex_fold_enabled = 1
-let g:vimtex_compiler_latexmk = {
-      \ 'build_dir': 'build',
-      \ }
+let g:vimtex_compiler_latexmk = {'build_dir': 'build'}
 let g:vimtex_compiler_latexmk_engines = {'_': '-lualatex'}
 let g:vimtex_view_general_viewer = 'llpp.inotify'
-autocmd FileType tex setlocal spell
-
-autocmd FileType python setlocal foldmethod=indent
-let g:python_recommended_style=0
 
 let g:load_doxygen_syntax=1
+
+command! W write suda://%
+command! E edit suda://%
+
+endfunction " MyPluginSettings ------------------------------------------------
 
 highlight Folded NONE ctermfg=14 guifg=Cyan
 highlight Visual guibg =#403d3d
@@ -200,7 +194,29 @@ highlight Info ctermfg=12 guifg=Cyan
 highlight Pmenu ctermbg=6 guibg=DarkMagenta
 highlight PmenuSel ctermfg=0 ctermbg=13 guifg=Blue guibg=Magenta
 
-command! W write suda://%
-command! E edit suda://%
-command! DiffOrig vert new | set bt=nofile | r ++edit # | 0d_ | diffthis
-  \ | wincmd p | diffthis
+"Install Plug if not found
+if empty(glob(stdpath('data').'/site/autoload/plug.vim'))
+  if $SUDO_USER == ''
+    function! InitPlugins(jobId, exitCode, eventType)
+      if a:exitCode != 0
+        echoerr 'Failed to download vim-plug.'
+      else
+        call MyPlugins() | PlugInstall --sync | call MyPluginSettings()
+      endif
+    endfunction
+    let jobid = jobstart(['/usr/bin/curl', '--create-dirs',
+    \   '-fLo', stdpath('data').'/site/autoload/plug.vim',
+    \   'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+    \ ], {
+    \   'on_exit': 'InitPlugins',
+    \ })
+    if jobid > 0
+      echomsg 'Downloading vim-plug...'
+    else
+      echoerr 'Curl not found.'
+    endif
+  endif
+else
+  call MyPlugins()
+  call MyPluginSettings()
+endif

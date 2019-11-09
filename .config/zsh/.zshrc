@@ -18,7 +18,7 @@ alias grep='grep --color=auto'
 alias ls='ls -v --color=auto'
 alias make="make -sj$(nproc)"
 alias pacdiff="sudo DIFFPROG='/usr/bin/nvim -d' DIFFSEARCHPATH='/boot /etc /usr' pacdiff"
-alias sudo='sudo '
+alias sudo='sudo ZDOTDIR=$ZDOTDIR EDITOR=$EDITOR SUDO_HOME=$HOME'
 alias tmus="tmux attach-session -t cmus 2>/dev/null || tmux -f '$HOME/.config/cmus/tmux.conf' new-session -s cmus 'cmus'"
 alias vi="$EDITOR"
 alias ytdl="noglob youtube-dl --add-metadata --audio-format m4a --ignore-errors --output '%(title)s.%(ext)s'"
@@ -70,20 +70,14 @@ setopt histFindNoDups
 setopt histIgnoreDups
 setopt histIgnoreSpace
 setopt interactiveComments
-setopt noHup
 setopt notify
 
-# plugins
-repeat 1; do
-  if which antibody >/dev/null; then; else
-    echo "Installing antibody..."
-    getantibody || break
-  fi
-  if [[ ! "$ZDOTDIR/.plugins.zsh" -nt "$ZDOTDIR/.plugins.txt" ]]; then
-    echo "Updating plugins..."
-    antibody bundle <"$ZDOTDIR/.plugins.txt" >"$ZDOTDIR/.plugins.zsh" || break
-    zcompile "$ZDOTDIR/.plugins.zsh"
-  fi
+if [[ "$TERM" == 'xterm-termite' && ( ! -f '/usr/share/terminfo/x/xterm-termite' ) && ( ! -f "$HOME/.config/terminfo/x/xterm-termite" ) ]]; then
+  curl -fL 'https://raw.githubusercontent.com/thestinger/termite/master/termite.terminfo' | tic -xo"$HOME/.config/terminfo" -
+fi
+export TERMINFO="$HOME/.config/terminfo"
+
+function plugins() {
   source "$ZDOTDIR/.plugins.zsh"
 
   autoload -Uz manydots-magic && manydots-magic
@@ -101,18 +95,41 @@ repeat 1; do
   bindkey '^[[B' history-substring-search-down
   bindkey -M vicmd 'j' history-substring-search-down
   bindkey -M vicmd 'k' history-substring-search-up
-done
+}
 
-if [[ "$TERM" == "xterm-termite" && ( ! -f "/usr/share/terminfo/x/xterm-termite" ) && ( ! -f "$HOME/.config/terminfo/x/xterm-termite" ) ]]; then
-  curl -fL 'https://raw.githubusercontent.com/thestinger/termite/master/termite.terminfo' | tic -xo"$HOME/.config/terminfo" -
-fi
-export TERMINFO="$HOME/.config/terminfo"
+if [[ "$SUDO_USER" && "$SUDO_USER" != "$USER" ]]; then
+  HISTFILE="$HOME/.histfile"
+  export EDITOR="XDG_CONFIG_HOME='$SUDO_HOME/.config' XDG_DATA_HOME='$SUDO_HOME/.local/share' /usr/bin/nvim"
+  alias nvim="$EDITOR"
+  alias vi="$EDITOR"
 
-autoload -Uz compinit && compinit
-if [[ ! "$ZDOTDIR/.zcompdump.zwc" -nt "$ZDOTDIR/.zcompdump" ]]; then
-  zcompile "$ZDOTDIR/.zcompdump"
+  if [[ -f "$ZDOTDIR/.plugins.zsh" ]]; then
+    plugins
+  fi
+
+  autoload -Uz compinit && compinit -C
+else
+  repeat 1; do
+    if which antibody >/dev/null; then; else
+      echo 'Installing antibody...'
+      getantibody || break
+    fi
+    if [[ ! "$ZDOTDIR/.plugins.zsh" -nt "$ZDOTDIR/.plugins.txt" ]]; then
+      echo 'Updating plugins...'
+      antibody bundle <"$ZDOTDIR/.plugins.txt" >"$ZDOTDIR/.plugins.zsh" || break
+      zcompile "$ZDOTDIR/.plugins.zsh"
+    fi
+    plugins
+  done
+
+  autoload -Uz compinit && compinit
+  if [[ ! "$ZDOTDIR/.zcompdump.zwc" -nt "$ZDOTDIR/.zcompdump" ]]; then
+    zcompile "$ZDOTDIR/.zcompdump"
+  fi
+
+  if [[ ! "$ZDOTDIR/.zshrc.zwc" -nt "$ZDOTDIR/.zshrc" ]]; then
+    zcompile "$ZDOTDIR/.zshrc"
+  fi
 fi
 
-if [[ ! "$ZDOTDIR/.zshrc.zwc" -nt "$ZDOTDIR/.zshrc" ]]; then
-  zcompile "$ZDOTDIR/.zshrc"
-fi
+unset plugins
