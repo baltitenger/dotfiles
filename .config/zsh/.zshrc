@@ -8,9 +8,9 @@ export MANPAGER="/usr/bin/nvim -c 'set ft=man nomod nolist' -"
 export PACKAGER='Baltazár Radics <baltazar.radics@gmail.com>' # for makepkg
 export PAGER='/usr/bin/less'
 export PDFVIEWER='/usr/bin/okular'
-export XDG_CONFIG_HOME="$XDG_CONFIG_HOME"
-export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
 eval $(dircolors)
 
 alias ccat='source-highlight-esc.sh'
