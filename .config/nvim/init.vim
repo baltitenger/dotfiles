@@ -175,6 +175,7 @@ call deoplete#custom#option('sources', {
 let g:vimtex_compiler_latexmk = {'build_dir': 'build'}
 let g:vimtex_compiler_latexmk_engines = {'_': '-lualatex'}
 let g:vimtex_view_general_viewer = 'llpp.inotify'
+autocmd FileType tex inoremap <expr> <buffer> `` vimtex#imaps#wrap_math("``", '`')
 
 let g:load_doxygen_syntax=1
 
@@ -183,16 +184,19 @@ command! E edit suda://%
 
 endfunction " MyPluginSettings ------------------------------------------------
 
-highlight Folded NONE ctermfg=14 guifg=Cyan
-highlight Visual guibg =#403d3d
-highlight ErrorMsg ctermbg=1 guibg=DarkRed
-highlight Error ctermbg=1 guibg=DarkRed
-highlight ErrorText guisp=Red gui=undercurl
-highlight Warning ctermfg=0 ctermbg=11 guifg=Blue guibg=Yellow
-highlight WarningText guisp=Yellow gui=undercurl
-highlight Info ctermfg=12 guifg=Cyan
-highlight Pmenu ctermbg=6 guibg=DarkMagenta
-highlight PmenuSel ctermfg=0 ctermbg=13 guifg=Blue guibg=Magenta
+highlight Error       guibg=DarkRed     ctermbg=1
+highlight ErrorMsg    guibg=DarkRed     ctermbg=1
+highlight ErrorText   guisp=Red         gui=undercurl
+highlight Folded      NONE              guifg=Cyan    ctermfg=14
+highlight Info        guifg=Cyan        ctermfg=12
+highlight Pmenu       guibg=DarkMagenta ctermbg=6
+highlight PmenuSel    guifg=Blue        guibg=Magenta ctermfg=0 ctermbg=13
+highlight SpellBad    guisp=Red         gui=undercurl
+highlight SpellCap    guisp=Magenta     gui=undercurl
+highlight SpellRare   guisp=Yellow      gui=undercurl
+highlight Visual      guibg=#403d3d
+highlight Warning     guifg=Blue        guibg=Yellow  ctermfg=0 ctermbg=11
+highlight WarningText guisp=Yellow      gui=undercurl
 
 "Install Plug if not found
 if empty(glob(stdpath('data').'/site/autoload/plug.vim'))

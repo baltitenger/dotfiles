@@ -8,6 +8,9 @@ export MANPAGER="/usr/bin/nvim -c 'set ft=man nomod nolist' -"
 export PACKAGER='Baltazár Radics <baltazar.radics@gmail.com>' # for makepkg
 export PAGER='/usr/bin/less'
 export PDFVIEWER='/usr/bin/okular'
+export XDG_CONFIG_HOME="$XDG_CONFIG_HOME"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CACHE_HOME="$HOME/.cache"
 eval $(dircolors)
 
 alias ccat='source-highlight-esc.sh'
@@ -18,8 +21,9 @@ alias grep='grep --color=auto'
 alias ls='ls -v --color=auto'
 alias make="make -sj$(nproc)"
 alias pacdiff="sudo DIFFPROG='/usr/bin/nvim -d' DIFFSEARCHPATH='/boot /etc /usr' pacdiff"
-alias sudo='sudo ZDOTDIR=$ZDOTDIR EDITOR=$EDITOR SUDO_HOME=$HOME'
-alias tmus="tmux attach-session -t cmus 2>/dev/null || tmux -f '$HOME/.config/cmus/tmux.conf' new-session -s cmus 'cmus'"
+alias sudo='sudo --preserve-env=ZDOTDIR,EDITOR,XDG_CONFIG_HOME,XDG_DATA_HOME' # gonna cause troubles for sure
+
+alias tmus="tmux attach-session -t cmus 2>/dev/null || tmux -f '$XDG_CONFIG_HOME/cmus/tmux.conf' new-session -s cmus 'cmus'"
 alias vi="$EDITOR"
 alias ytdl="noglob youtube-dl --add-metadata --audio-format m4a --ignore-errors --output '%(title)s.%(ext)s'"
 
@@ -33,19 +37,11 @@ zstyle ':completion:*' rehash true
 zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
 
 zstyle ':vcs_info:*' actionformats '%F{magenta}[%F{green}%b%F{yellow}|%F{red}%a%F{magenta}]%f'
-zstyle ':vcs_info:*' enable git cvs svn
+zstyle ':vcs_info:*' check-for-changes false
+zstyle ':vcs_info:*' check-for-staged-changes true
+zstyle ':vcs_info:*' enable git hg svn
 zstyle ':vcs_info:*' formats '%F{magenta}[%F{green}%b%F{magenta}]%f'
-
-autoload -Uz vcs_info zmv zcalc
-zmodload zsh/mathfunc
-
-function precmd() {
-  # title
-  echo -n "\e]2;$USER@$HOST:`basename "${PWD/#$HOME/~}"`\a"
-  # prompt
-  PS1='%B%F{%(!.red.green)}%n%F{cyan}@%F{yellow}%m%f:%F{blue}%1~%b'"$(vcs_info && echo ${vcs_info_msg_0_})"'%f%b%1(j.<%j>.)%B%F{%(?.green.red)}%(#.#.$)%f%b '
-  PS2='%_['"$(( $(print -Pn $PS1 | sed 's/\[[0-9;]*m//g' | wc -c) - 2 ))"'C> '
-}
+zstyle ':vcs_info:*+pre-get-data:*' hooks pre-get-data
 
 bindkey -v
 bindkey ''      backward-kill-word
@@ -61,6 +57,9 @@ bindkey '[3~'   delete-char
 bindkey '^R'      history-incremental-search-backward
 bindkey ''      backward-delete-char
 
+FORCE_RUN_VCS_INFO=1
+PS1='%B%F{%(!.red.green)}%n%F{cyan}@%F{yellow}%m%f:%F{blue}%1~%b${vcs_info_msg_0_}%f%b%1(j.<%j>.)%B%F{%(?.green.red)}%(#.#.$)%f%b '
+PS2='%_[$(( $(print -Pn $PS1 | sed '\''s/\[[0-9;]*m//g'\'' | wc -c) - 2 ))C> '
 HISTFILE="$ZDOTDIR/.histfile"
 HISTSIZE=10000
 SAVEHIST=10000
@@ -71,11 +70,47 @@ setopt histIgnoreDups
 setopt histIgnoreSpace
 setopt interactiveComments
 setopt notify
+setopt promptsubst
 
-if [[ "$TERM" == 'xterm-termite' && ( ! -f '/usr/share/terminfo/x/xterm-termite' ) && ( ! -f "$HOME/.config/terminfo/x/xterm-termite" ) ]]; then
-  curl -fL 'https://raw.githubusercontent.com/thestinger/termite/master/termite.terminfo' | tic -xo"$HOME/.config/terminfo" -
+autoload -Uz vcs_info zmv zcalc add-zsh-hook
+zmodload zsh/mathfunc
+
++vi-pre-get-data() {
+  [[ "$vcs" != git && "$vcs" != hg ]] && return
+  if [[ -n $FORCE_RUN_VCS_INFO ]]; then
+    FORCE_RUN_VCS_INFO=
+    return
+  fi
+  ret=1
+  case "$(fc -ln $(($HISTCMD-1)))" in
+    git*)
+      ret=0
+      ;;
+    hg*)
+      ret=0
+      ;;
+  esac
+}
+
+prompt_precmd() {
+  vcs_info
+}
+add-zsh-hook precmd prompt_precmd
+
+prompt_chpwd() {
+  FORCE_RUN_VCS_INFO=1
+}
+add-zsh-hook chpwd prompt_chpwd
+
+set_title_chpwd() {
+  echo -n "\e]2;$USER@$HOST:`basename "${PWD/#$HOME/~}"`\a"
+}
+add-zsh-hook chpwd set_title_chpwd
+
+if [[ "$TERM" == 'xterm-termite' && ( ! -f '/usr/share/terminfo/x/xterm-termite' ) && ( ! -f "$XDG_CONFIG_HOME/terminfo/x/xterm-termite" ) ]]; then
+  curl -fL 'https://raw.githubusercontent.com/thestinger/termite/master/termite.terminfo' | tic -xo"$XDG_CONFIG_HOME/terminfo" -
 fi
-export TERMINFO="$HOME/.config/terminfo"
+export TERMINFO="$XDG_CONFIG_HOME/terminfo"
 
 function plugins() {
   source "$ZDOTDIR/.plugins.zsh"
@@ -99,9 +134,6 @@ function plugins() {
 
 if [[ "$SUDO_USER" && "$SUDO_USER" != "$USER" ]]; then
   HISTFILE="$HOME/.histfile"
-  export EDITOR="XDG_CONFIG_HOME='$SUDO_HOME/.config' XDG_DATA_HOME='$SUDO_HOME/.local/share' /usr/bin/nvim"
-  alias nvim="$EDITOR"
-  alias vi="$EDITOR"
 
   if [[ -f "$ZDOTDIR/.plugins.zsh" ]]; then
     plugins
