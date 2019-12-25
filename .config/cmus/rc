@@ -3,9 +3,9 @@ set altformat_playlist= %-21%A      %F %= %d %{?X!=0?%3X?   }
 set altformat_title=%f
 set altformat_trackwin=      %F %= %d 
 set auto_reshuffle=true
-set format_current= %a - %l %{?n?%n.?-} %t %= %y 
-set format_playlist= %-21%A %{?n?%3n.?    } %t      %= %y %d %{?X!=0?%3X?   } 
-set format_playlist_va= %-21%A %{?n?%3n.?    } %t (%a) %= %y %d %{?X!=0?%3X?   } 
+set format_current= %{?a?%a?Unknown Artist} - %{?l?%l - ?}%{?n?%n. ?}%t%= %y
+set format_playlist= %-21%A %{?n?%3n.?    } %t%= %y %d %{?X!=0?%3X?   } 
+set format_playlist_va= %-21%A %{?n?%3n.?    } %t (%a)%= %y %d %{?X!=0?%3X?   } 
 set format_statusline= %{status} %{?show_playback_position?%{position} %{?duration?/ %{duration} }?%{?duration?%{duration} }}- %{total} %{?volume>=0?vol: %{?lvolume!=rvolume?%{lvolume},%{rvolume} ?%{volume} }}%{?stream?buf: %{buffer} }%{?show_current_bitrate & bitrate>=0? %{bitrate} kbps }%=%{?repeat_current?repeat current?%{?play_library?%{playlist_mode} from %{?play_sorted?sorted }library?playlist}} | %{?continue="C"?C?c}%{?follow="F"?F?f}%{?repeat="R"?R?r}%{?shuffle="S"?S?s} 
 set format_title=%a - %l - %t (%y)
 set format_trackwin= %{?n?%3n.?    } %t      %= %y %d 
@@ -16,18 +16,12 @@ set format_treewin_artist=%a
 set lib_sort=albumartist date album discnumber tracknumber title filename play_count
 set mouse=true
 set mpris=true
-set resume=true
+set resume=false
 set set_term_title=true
+
 colorscheme green
-set color_error=lightred
-set color_info=lightgreen
 set color_separator=green
-set color_statusline_fg=gray
-set color_titleline_fg=green
 set color_trackwin_album_attr=bold
-set color_win_cur=lightgreen
-set color_win_cur_sel_fg=white
-set color_win_inactive_cur_sel_fg=lightgreen
-set color_win_sel_fg=green
-set color_win_title_fg=green
+set color_win_inactive_sel_fg=lightcyan
+
 bind -f common d shell tmux detach-client -s cmus

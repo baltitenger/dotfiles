@@ -3,6 +3,9 @@
 !.config/cmus/
 !.config/cmus/rc
 !.config/cmus/tmux.conf
+!.config/coc/
+!.config/coc/extensions/
+!.config/coc/extensions/package.json
 !.config/git/
 !.config/git/config
 !.config/git/ignore

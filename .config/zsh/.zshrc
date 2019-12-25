@@ -8,9 +8,7 @@ export MANPAGER="/usr/bin/nvim -c 'set ft=man nomod nolist' -"
 export PACKAGER='Baltazár Radics <baltazar.radics@gmail.com>' # for makepkg
 export PAGER='/usr/bin/less'
 export PDFVIEWER='/usr/bin/okular'
-export XDG_CACHE_HOME="$HOME/.cache"
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_DATA_HOME="$HOME/.local/share"
+export ARDMK="$HOME/Arduino/Arduino.mk"
 eval $(dircolors)
 
 alias ccat='source-highlight-esc.sh'
@@ -21,11 +19,11 @@ alias grep='grep --color=auto'
 alias ls='ls -v --color=auto'
 alias make="make -sj$(nproc)"
 alias pacdiff="sudo DIFFPROG='/usr/bin/nvim -d' DIFFSEARCHPATH='/boot /etc /usr' pacdiff"
-alias sudo='sudo --preserve-env=ZDOTDIR,EDITOR,XDG_CONFIG_HOME,XDG_DATA_HOME' # gonna cause troubles for sure
+alias sudo='sudo --preserve-env=ZDOTDIR,EDITOR,XDG_CONFIG_HOME,XDG_DATA_HOME ' # gonna cause troubles for sure
 
 alias tmus="tmux attach-session -t cmus 2>/dev/null || tmux -f '$XDG_CONFIG_HOME/cmus/tmux.conf' new-session -s cmus 'cmus'"
 alias vi="$EDITOR"
-alias ytdl="noglob youtube-dl --add-metadata --audio-format m4a --ignore-errors --output '%(title)s.%(ext)s'"
+alias ytdl="noglob youtube-dl --ignore-errors --output '%(title)s.%(ext)s'"
 
 zstyle ':completion:*' completer _expand _complete _ignored _correct _approximate
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
@@ -96,16 +94,16 @@ prompt_precmd() {
   vcs_info
 }
 add-zsh-hook precmd prompt_precmd
+set_title_precmd() {
+  echo -n "\e]2;$USER@$HOST:`basename "${PWD/#$HOME/~}"`\a"
+}
+set_title_precmd
+add-zsh-hook precmd set_title_precmd
 
 prompt_chpwd() {
   FORCE_RUN_VCS_INFO=1
 }
 add-zsh-hook chpwd prompt_chpwd
-
-set_title_chpwd() {
-  echo -n "\e]2;$USER@$HOST:`basename "${PWD/#$HOME/~}"`\a"
-}
-add-zsh-hook chpwd set_title_chpwd
 
 if [[ "$TERM" == 'xterm-termite' && ( ! -f '/usr/share/terminfo/x/xterm-termite' ) && ( ! -f "$XDG_CONFIG_HOME/terminfo/x/xterm-termite" ) ]]; then
   curl -fL 'https://raw.githubusercontent.com/thestinger/termite/master/termite.terminfo' | tic -xo"$XDG_CONFIG_HOME/terminfo" -
