@@ -8,7 +8,7 @@ export MANPAGER="/usr/bin/nvim -c 'set ft=man nomod nolist' -"
 export PACKAGER='Baltazár Radics <baltazar.radics@gmail.com>' # for makepkg
 export PAGER='/usr/bin/less'
 export PDFVIEWER='/usr/bin/okular'
-export ARDMK="$HOME/Arduino/Arduino.mk"
+export ARDMK="$HOME/stuff/arduino/arduino.mk"
 eval $(dircolors)
 
 alias ccat='source-highlight-esc.sh'

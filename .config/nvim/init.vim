@@ -67,7 +67,7 @@ highlight Visual      guibg=#403d3d
 highlight Warning     guifg=Blue        guibg=Yellow  ctermfg=0 ctermbg=11
 highlight WarningText guisp=Yellow      gui=undercurl
 
-let g:haveNode = executable('node')
+let g:haveNode = executable('npm') || executable('yarn')
 let g:haveLaTeX = executable('latexmk')
 
 function! s:MyPlugins()
@@ -129,7 +129,9 @@ if empty(glob(stdpath('data').'/site/autoload/plug.vim'))
     if a:exitCode != 0
       echoerr 'Failed to download vim-plug.'
     else
-      call <SID>MyPlugins() | PlugInstall --sync | CocPlugins | call <SID>MyPluginSettings()
+      call <SID>MyPlugins()
+      PlugInstall --sync
+      call <SID>MyPluginSettings()
     endif
   endfunction
   function! s:PlugInstall()
@@ -137,7 +139,7 @@ if empty(glob(stdpath('data').'/site/autoload/plug.vim'))
     \   '-fLo', stdpath('data').'/site/autoload/plug.vim',
     \   'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
     \ ], {
-    \   'on_exit': '<SID>InitPlugins',
+    \   'on_exit': function('<SID>PlugInit'),
     \ })
     if jobid > 0
       echomsg 'Downloading vim-plug...'
@@ -145,7 +147,7 @@ if empty(glob(stdpath('data').'/site/autoload/plug.vim'))
       echoerr 'Curl not found.'
     endif
   endfunction
-  command! PlugInstall call <SID>PlugInstall();
+  command! Plugins call <SID>PlugInstall()
 else
   call <SID>MyPlugins()
   call <SID>MyPluginSettings()
