@@ -10,6 +10,8 @@
 !.config/git/config
 !.config/git/ignore
 !.config/nvim/
+!.config/nvim/clang-format
+!.config/nvim/coc-settings.json
 !.config/nvim/init.vim
 !.config/redshift.conf
 !.config/redshift/
