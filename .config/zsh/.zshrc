@@ -1,14 +1,14 @@
+export ARDMK="$HOME/stuff/arduino/arduino.mk"
 export BROWSER='/usr/bin/opera'
 export CC='/usr/bin/clang'
 export CXX='/usr/bin/clang++'
 export EDITOR='/usr/bin/nvim'
 export LESS='-R '
 export LESSOPEN='| /usr/bin/src-hilite-lesspipe.sh %s'
-export MANPAGER="/usr/bin/nvim -c 'set ft=man nomod nolist' -"
-export PACKAGER='Baltazár Radics <baltazar.radics@gmail.com>' # for makepkg
+export MANPAGER='/usr/bin/nvim +Man!'
 export PAGER='/usr/bin/less'
+export PASSWORD_STORE_DIR="$HOME/.local/share/pass"
 export PDFVIEWER='/usr/bin/okular'
-export ARDMK="$HOME/stuff/arduino/arduino.mk"
 eval $(dircolors)
 
 alias ccat='source-highlight-esc.sh'
@@ -17,12 +17,12 @@ alias getantibody="curl -fL https://git.io/antibody | sh -s - -b $HOME/.local/bi
 alias gpgfix='gpg-connect-agent updatestartuptty /bye >/dev/null'
 alias grep='grep --color=auto'
 alias ls='ls -v --color=auto'
-alias make="make -sj$(nproc)"
+alias make="make -j$(nproc)"
 alias pacdiff="sudo DIFFPROG='/usr/bin/nvim -d' DIFFSEARCHPATH='/boot /etc /usr' pacdiff"
 alias sudo='sudo --preserve-env=ZDOTDIR,EDITOR,XDG_CONFIG_HOME,XDG_DATA_HOME ' # gonna cause troubles for sure
-
 alias tmus="tmux attach-session -t cmus 2>/dev/null || tmux -f '$XDG_CONFIG_HOME/cmus/tmux.conf' new-session -s cmus 'cmus'"
 alias vi="$EDITOR"
+alias xxd='hexdump -C'
 alias ytdl="noglob youtube-dl --ignore-errors --output '%(title)s.%(ext)s'"
 
 zstyle ':completion:*' completer _expand _complete _ignored _correct _approximate
@@ -74,92 +74,93 @@ autoload -Uz vcs_info zmv zcalc add-zsh-hook
 zmodload zsh/mathfunc
 
 +vi-pre-get-data() {
-  [[ "$vcs" != git && "$vcs" != hg ]] && return
-  if [[ -n $FORCE_RUN_VCS_INFO ]]; then
-    FORCE_RUN_VCS_INFO=
-    return
-  fi
-  ret=1
-  case "$(fc -ln $(($HISTCMD-1)))" in
-    git*)
-      ret=0
-      ;;
-    hg*)
-      ret=0
-      ;;
-  esac
+	[[ "$vcs" != git && "$vcs" != hg ]] && return
+	if [[ -n $FORCE_RUN_VCS_INFO ]]; then
+		FORCE_RUN_VCS_INFO=
+		return
+	fi
+	ret=1
+	case "$(fc -ln $(($HISTCMD-1)))" in
+		git*)
+			ret=0
+			;;
+		hg*)
+			ret=0
+			;;
+	esac
 }
 
 prompt_precmd() {
-  vcs_info
+	vcs_info
 }
 add-zsh-hook precmd prompt_precmd
 set_title_precmd() {
-  echo -n "\e]2;$USER@$HOST:`basename "${PWD/#$HOME/~}"`\a"
+	echo -n "\e]2;$USER@$HOST:`basename "${PWD/#$HOME/~}"`\a"
 }
 set_title_precmd
 add-zsh-hook precmd set_title_precmd
 
 prompt_chpwd() {
-  FORCE_RUN_VCS_INFO=1
+	FORCE_RUN_VCS_INFO=1
 }
 add-zsh-hook chpwd prompt_chpwd
 
 if [[ "$TERM" == 'xterm-termite' && ( ! -f '/usr/share/terminfo/x/xterm-termite' ) && ( ! -f "$XDG_CONFIG_HOME/terminfo/x/xterm-termite" ) ]]; then
-  curl -fL 'https://raw.githubusercontent.com/thestinger/termite/master/termite.terminfo' | tic -xo"$XDG_CONFIG_HOME/terminfo" -
+	echo 'Downloading terminfo for termite...'
+	curl -fL 'https://raw.githubusercontent.com/thestinger/termite/master/termite.terminfo' | tic -xo"$XDG_CONFIG_HOME/terminfo" -
 fi
 export TERMINFO="$XDG_CONFIG_HOME/terminfo"
 
 function plugins() {
-  source "$ZDOTDIR/.plugins.zsh"
+	source "$ZDOTDIR/.plugins.zsh"
 
-  autoload -Uz manydots-magic && manydots-magic
+	autoload -Uz manydots-magic && manydots-magic
 
-  ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
-  ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#FFA500'
-  ZSH_HIGHLIGHT_STYLES[globbing]='fg=cyan'
-  ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=cyan'
-  ZSH_HIGHLIGHT_STYLES[path]='fg=green'
-  ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#FFA500'
+	ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
+	ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#FFA500'
+	ZSH_HIGHLIGHT_STYLES[globbing]='fg=cyan'
+	ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=cyan'
+	ZSH_HIGHLIGHT_STYLES[path]='fg=green'
+	ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#FFA500'
 
-  HISTORY_SUBSTRING_SEARCH_ENSURE_UNIQUE=1
-  HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND='underline'
-  bindkey '^[[A' history-substring-search-up
-  bindkey '^[[B' history-substring-search-down
-  bindkey -M vicmd 'j' history-substring-search-down
-  bindkey -M vicmd 'k' history-substring-search-up
+	HISTORY_SUBSTRING_SEARCH_ENSURE_UNIQUE=1
+	HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND='underline'
+	bindkey '^[[A' history-substring-search-up
+	bindkey '^[[B' history-substring-search-down
+	bindkey -M vicmd 'j' history-substring-search-down
+	bindkey -M vicmd 'k' history-substring-search-up
 }
 
 if [[ "$SUDO_USER" && "$SUDO_USER" != "$USER" ]]; then
-  HISTFILE="$HOME/.histfile"
+	HISTFILE="$HOME/.histfile"
 
-  if [[ -f "$ZDOTDIR/.plugins.zsh" ]]; then
-    plugins
-  fi
+	if [[ -f "$ZDOTDIR/.plugins.zsh" ]]; then
+		plugins
+	fi
 
-  autoload -Uz compinit && compinit -C
+	autoload -Uz compinit && compinit -C
 else
-  repeat 1; do
-    if which antibody >/dev/null; then; else
-      echo 'Installing antibody...'
-      getantibody || break
-    fi
-    if [[ ! "$ZDOTDIR/.plugins.zsh" -nt "$ZDOTDIR/.plugins.txt" ]]; then
-      echo 'Updating plugins...'
-      antibody bundle <"$ZDOTDIR/.plugins.txt" >"$ZDOTDIR/.plugins.zsh" || break
-      zcompile "$ZDOTDIR/.plugins.zsh"
-    fi
-    plugins
-  done
+	repeat 1; do
+		if which antibody >/dev/null; then; else
+			echo 'Installing antibody...'
+			getantibody || break
+		fi
+		if [[ ! "$ZDOTDIR/.plugins.zsh" -nt "$ZDOTDIR/.plugins.txt" ]]; then
+			echo 'Updating plugins...'
+			antibody bundle <"$ZDOTDIR/.plugins.txt" >"$ZDOTDIR/.plugins.zsh" || break
+			zcompile "$ZDOTDIR/.plugins.zsh"
+		fi
+		plugins
+	done
 
-  autoload -Uz compinit && compinit
-  if [[ ! "$ZDOTDIR/.zcompdump.zwc" -nt "$ZDOTDIR/.zcompdump" ]]; then
-    zcompile "$ZDOTDIR/.zcompdump"
-  fi
+	autoload -Uz compinit && compinit
+	if [[ ! "$ZDOTDIR/.zcompdump.zwc" -nt "$ZDOTDIR/.zcompdump" ]]; then
+		zcompile "$ZDOTDIR/.zcompdump"
+	fi
 
-  if [[ ! "$ZDOTDIR/.zshrc.zwc" -nt "$ZDOTDIR/.zshrc" ]]; then
-    zcompile "$ZDOTDIR/.zshrc"
-  fi
+	if [[ ! "$ZDOTDIR/.zshrc.zwc" -nt "$ZDOTDIR/.zshrc" ]]; then
+		zcompile "$ZDOTDIR/.zshrc"
+	fi
 fi
 
 unset plugins

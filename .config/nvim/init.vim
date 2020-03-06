@@ -1,6 +1,6 @@
 set autowrite
 set clipboard+=unnamed
-set expandtab shiftwidth=2 smarttab
+set shiftwidth=2 tabstop=2
 set foldmethod=syntax foldlevelstart=99
 set ignorecase smartcase
 set linebreak
@@ -14,6 +14,8 @@ set title
 set undofile
 set updatetime=300
 set keymap=magyar iminsert=0
+set diffopt+=iwhite
+set list listchars=tab:\ \ 
 
 command! DiffOrig vert new | set bt=nofile | r ++edit # | 0d_ | diffthis
 \ | wincmd p | diffthis
@@ -23,10 +25,11 @@ if $TERM isnot# 'linux'
   set termguicolors
 endif
 
+let g:man_hardwrap = 1
 let g:netrw_banner = 0
+let g:python_recommended_style = 0
 let g:tex_comment_nospell = 1
 let g:tex_fold_enabled = 1
-let g:python_recommended_style = 0
 
 autocmd FileType tex setlocal spell
 autocmd FileType python setlocal foldmethod=indent
@@ -66,21 +69,30 @@ highlight SpellRare   guisp=Yellow      gui=undercurl
 highlight Visual      guibg=#403d3d
 highlight Warning     guifg=Blue        guibg=Yellow  ctermfg=0 ctermbg=11
 highlight WarningText guisp=Yellow      gui=undercurl
+highlight manUnderline guifg=Green      ctermfg=2
+highlight link Whitespace NONE
 
 let g:haveNode = executable('npm') || executable('yarn')
-let g:haveLaTeX = executable('latexmk')
+let g:haveLatex = executable('latexmk')
+let g:haveGdb = executable('gdb')
+let g:haveCtags = executable('ctags')
 
 function! s:MyPlugins()
 call plug#begin(stdpath('data').'/plugged')
 if g:haveNode
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
 endif
-if g:haveLaTeX
+if g:haveLatex
   Plug 'lervag/vimtex'
 endif
-  Plug 'junegunn/vim-easy-align'
+if g:haveCtags
   Plug 'majutsushi/tagbar', { 'on_cmd' : 'TagbarToggle' }
+endif
+  Plug 'junegunn/vim-easy-align'
 call plug#end()
+if g:haveGdb
+  packadd termdebug
+endif
 endfunction
 
 function s:MyPluginSettings()
@@ -94,7 +106,7 @@ if g:haveNode
   let g:coc_snippet_next = '<c-j>'
   let g:coc_snippet_prev = '<c-k>'
 endif
-if g:haveLaTeX
+if g:haveLatex
   " vimtex:
   let g:vimtex_compiler_latexmk = {'build_dir': 'build'}
   let g:vimtex_compiler_latexmk_engines = {'_': '-lualatex'}
@@ -120,7 +132,7 @@ endif
   \     'ignore_groups':   ['String', 'Comment'],
   \   },
   \ }
-  autocmd FileType markdown imap <Bar> <Bar><Esc>m`gaip*<Bar>``A
+  autocmd FileType markdown imap <buffer> <Bar> <Bar><Esc>m`gaip*<Bar>``A
 endfunction
 
 "Install Plug if not found
