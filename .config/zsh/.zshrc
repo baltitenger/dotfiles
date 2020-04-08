@@ -5,7 +5,8 @@ export CXX='/usr/bin/clang++'
 export EDITOR='/usr/bin/nvim'
 export LESS='-R '
 export LESSOPEN='| /usr/bin/src-hilite-lesspipe.sh %s'
-export MANPAGER='/usr/bin/nvim +Man!'
+#export MANPAGER='/usr/bin/nvim +Man!'
+export MANPAGER='/usr/bin/vim --not-a-term -c MANPAGER -'
 export PAGER='/usr/bin/less'
 export PASSWORD_STORE_DIR="$HOME/.local/share/pass"
 export PDFVIEWER='/usr/bin/okular'
@@ -145,9 +146,9 @@ else
 			echo 'Installing antibody...'
 			getantibody || break
 		fi
-		if [[ ! "$ZDOTDIR/.plugins.zsh" -nt "$ZDOTDIR/.plugins.txt" ]]; then
+		if [[ ! "$ZDOTDIR/.plugins.zsh" -nt "$ZDOTDIR/plugins.txt" ]]; then
 			echo 'Updating plugins...'
-			antibody bundle <"$ZDOTDIR/.plugins.txt" >"$ZDOTDIR/.plugins.zsh" || break
+			antibody bundle <"$ZDOTDIR/.pluginstxt" >"$ZDOTDIR/.plugins.zsh" || break
 			zcompile "$ZDOTDIR/.plugins.zsh"
 		fi
 		plugins
