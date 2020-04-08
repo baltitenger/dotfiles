@@ -2,10 +2,9 @@ export ARDMK="$HOME/stuff/arduino/arduino.mk"
 export BROWSER='/usr/bin/opera'
 export CC='/usr/bin/clang'
 export CXX='/usr/bin/clang++'
-export EDITOR='/usr/bin/nvim'
+export EDITOR='/usr/bin/vim'
 export LESS='-R '
 export LESSOPEN='| /usr/bin/src-hilite-lesspipe.sh %s'
-#export MANPAGER='/usr/bin/nvim +Man!'
 export MANPAGER='/usr/bin/vim --not-a-term -c MANPAGER -'
 export PAGER='/usr/bin/less'
 export PASSWORD_STORE_DIR="$HOME/.local/share/pass"
@@ -19,7 +18,6 @@ alias gpgfix='gpg-connect-agent updatestartuptty /bye >/dev/null'
 alias grep='grep --color=auto'
 alias ls='ls -v --color=auto'
 alias make="make -j$(nproc)"
-alias pacdiff="sudo DIFFPROG='/usr/bin/nvim -d' DIFFSEARCHPATH='/boot /etc /usr' pacdiff"
 alias sudo='sudo --preserve-env=ZDOTDIR,EDITOR,XDG_CONFIG_HOME,XDG_DATA_HOME ' # gonna cause troubles for sure
 alias tmus="tmux attach-session -t cmus 2>/dev/null || tmux -f '$XDG_CONFIG_HOME/cmus/tmux.conf' new-session -s cmus 'cmus'"
 alias vi="$EDITOR"
@@ -134,11 +132,9 @@ function plugins() {
 
 if [[ "$SUDO_USER" && "$SUDO_USER" != "$USER" ]]; then
 	HISTFILE="$HOME/.histfile"
-
 	if [[ -f "$ZDOTDIR/.plugins.zsh" ]]; then
 		plugins
 	fi
-
 	autoload -Uz compinit && compinit -C
 else
 	repeat 1; do
@@ -148,20 +144,20 @@ else
 		fi
 		if [[ ! "$ZDOTDIR/.plugins.zsh" -nt "$ZDOTDIR/plugins.txt" ]]; then
 			echo 'Updating plugins...'
-			antibody bundle <"$ZDOTDIR/.pluginstxt" >"$ZDOTDIR/.plugins.zsh" || break
+			antibody bundle <"$ZDOTDIR/plugins.txt" >"$ZDOTDIR/.plugins.zsh" || break
 			zcompile "$ZDOTDIR/.plugins.zsh"
 		fi
 		plugins
 	done
-
 	autoload -Uz compinit && compinit
 	if [[ ! "$ZDOTDIR/.zcompdump.zwc" -nt "$ZDOTDIR/.zcompdump" ]]; then
 		zcompile "$ZDOTDIR/.zcompdump"
 	fi
-
 	if [[ ! "$ZDOTDIR/.zshrc.zwc" -nt "$ZDOTDIR/.zshrc" ]]; then
 		zcompile "$ZDOTDIR/.zshrc"
 	fi
 fi
 
 unset plugins
+
+# vim: ts=2 sw=0 noet
