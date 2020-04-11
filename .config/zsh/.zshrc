@@ -5,7 +5,7 @@ export CXX='/usr/bin/clang++'
 export EDITOR='/usr/bin/vim'
 export LESS='-R '
 export LESSOPEN='| /usr/bin/src-hilite-lesspipe.sh %s'
-export MANPAGER='/usr/bin/vim --not-a-term -c MANPAGER -'
+export MANPAGER='/usr/bin/vim --not-a-term -c MANMAN -'
 export PAGER='/usr/bin/less'
 export PASSWORD_STORE_DIR="$HOME/.local/share/pass"
 export PDFVIEWER='/usr/bin/okular'
@@ -20,6 +20,7 @@ alias ls='ls -v --color=auto'
 alias make="make -j$(nproc)"
 alias sudo='sudo --preserve-env=ZDOTDIR,EDITOR,XDG_CONFIG_HOME,XDG_DATA_HOME ' # gonna cause troubles for sure
 alias tmus="tmux attach-session -t cmus 2>/dev/null || tmux -f '$XDG_CONFIG_HOME/cmus/tmux.conf' new-session -s cmus 'cmus'"
+alias tvim="vim --servername '$VIM_SERVERNAME' --remote"
 alias vi="$EDITOR"
 alias xxd='hexdump -C'
 alias ytdl="noglob youtube-dl --ignore-errors --output '%(title)s.%(ext)s'"
