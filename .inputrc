@@ -1,0 +1,18 @@
+set editing-mode vi
+set convert-meta off
+set completion-ignore-case On
+set blink-matching-paren On
+set colored-stats On
+set enable-bracketed-paste On
+set show-all-if-unmodified On
+set visible-stats On
+set colored-stats On
+
+# arrow up
+"\e[A": history-substring-search-backward
+# arrow down
+"\e[B": history-substring-search-forward
+
+"\C-L": clear-screen
+# ctrl-backspace
+"\C-H": backward-kill-word
