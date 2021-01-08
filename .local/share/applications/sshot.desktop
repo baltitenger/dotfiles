@@ -1,0 +1,18 @@
+[Desktop Entry]
+Type=Application
+Name=Screenshot
+Icon=select-rectangular
+Categories=Utility;
+Actions=Screenshot;FullScreenshot;
+Exec=screenshot
+Terminal=false
+
+[Desktop Action FullScreenshot]
+Name=Take a full screensot
+Icon=select-rectangular
+Exec=screenshot -r
+
+[Desktop Action Screenshot]
+Name=Take a screenshot
+Icon=select-rectangular
+Exec=screenshot

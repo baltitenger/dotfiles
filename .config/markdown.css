@@ -1,0 +1,14 @@
+html {
+	max-width: 800px;
+	margin: auto;
+}
+
+:not(li)>p {
+	margin: 0;
+	text-align: justify;
+	text-indent: 1em;
+}
+
+.flright {
+	float: right;
+}
