@@ -6,7 +6,7 @@ source /usr/share/git/git-prompt.sh 2>/dev/null &&
   GIT_PS1_COMPRESSSPARSESTATE=1 GIT_PS1_SHOWSTASHSTATE=1 \
   GIT_PS1_SHOWUPSTREAM=auto GIT_PS1_STATESEPARATOR=
 shopt -s globstar histappend lithist
-tabs -2
+tabs -2 2>/dev/null
 HISTCONTROL=ignoreboth
 HISTSIZE=10000
 HISTFILESIZE=10000
@@ -25,7 +25,7 @@ alias config="git --git-dir=$HOME/.cfg --work-tree=$HOME"
 alias gpgfix='gpg-connect-agent updatestartuptty /bye'
 alias tmus="tmux new-session -As cmus cmus"
 alias ytdl="youtube-dl --ignore-errors --output '%(title)s.%(ext)s' --no-mtime"
-vmv() { nvim +"Rename $1"; }
+vmv() { nvim +"Renamer $1"; }
 export CPPFLAGS CFLAGS CXXFLAGS LDFLAGS
 envdbg() {
 	CPPFLAGS='-D_GLIBCXX_DEBUG'
@@ -55,4 +55,28 @@ man() {
 	LESS_TERMCAP_us=$'\e[01;32m' \
 	LESS_TERMCAP_ue=$'\e[0m' \
 	command man "$@"
+}
+
+ix() {
+	local opts='-n'
+	local OPTIND
+	while getopts ':hd:i:n:' x; do
+		case $x in
+			h) echo 'ix [-d ID] [-i ID] [-n N] [opts]'; return;;
+			d) $echo curl $opts -X DELETE ix.io/$OPTARG; return;;
+			i) opts="$opts -X PUT"; local id="$OPTARG";;
+			n) opts="$opts -F read:1=$OPTARG";;
+		esac
+	done
+	shift $(($OPTIND - 1))
+	[ -t 0 ] && {
+		local filename="$1"
+		shift
+		[ "$filename" ] && {
+			curl $opts -F f:1=@"$filename" $* ix.io/$id
+			return
+		}
+		echo '^C to cancel, ^D to send.'
+	}
+	curl $opts -F f:1='<-' $* ix.io/$id
 }

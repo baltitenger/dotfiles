@@ -206,6 +206,9 @@ imap <expr> <S-Tab> vsnip#available(-1) ? '<Plug>(vsnip-jump-prev)'      : '<S-T
 smap <expr> <S-Tab> vsnip#available(-1) ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
 ]]
 
+vim.fn['plug#'] 'qpkorr/vim-renamer'
+vim.g.RenamerSupportColonWToRename = 1
+
 vim.call('plug#end')
 
 for k,v in pairs(vim.g.plugs) do
