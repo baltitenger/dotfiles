@@ -13,7 +13,7 @@ set background=dark
 set laststatus=1 helpheight=0
 set title
 set mouse=nv
-set undofile formatoptions=croq1jp completeopt=menuone,noinsert,noselect,preview
+set undofile formatoptions=croq1jp completeopt=menuone,noinsert,noselect
 set tabstop=2 shiftwidth=0 smartindent
 set foldlevelstart=99 foldmethod=syntax
 set diffopt=filler,iwhite,closeoff,internal,indent-heuristic
@@ -45,7 +45,7 @@ hi Error        guibg=DarkRed
 hi ErrorMsg     guibg=DarkRed
 hi Folded       guibg=NONE guifg=Cyan
 hi Pmenu        guibg=DarkMagenta
-hi PmenuSel     guibg=Magenta guifg=Blue 
+hi PmenuSel     guibg=Magenta guifg=Blue
 hi SpellBad     NONE guifg=Red
 hi SpellCap     NONE guifg=Orange
 hi SpellRare    NONE guifg=Yellow
@@ -67,8 +67,9 @@ vim.api.nvim_set_keymap('v', '<Leader>w', '<Cmd>lua VisualWc()<CR>', {})
 function VisualWc()
 	local wc = vim.fn.wordcount()
 	local lines = 1-vim.fn.line("'<")+vim.fn.line("'>")
-	print(lines, wc.visual_words, wc.visual_chars)
+	print(lines, wc.visual_words, wc.visual_chars, '\n')
 end
+
 
 local function executable(cmd)
 	return vim.fn.executable(cmd) == 1
@@ -93,8 +94,9 @@ end
 local after = {}
 
 vim.call('plug#begin', datapath..'/plugged')
+local Plug = vim.fn['plug#']
 
-vim.fn['plug#'] 'junegunn/vim-easy-align'
+Plug 'junegunn/vim-easy-align'
 vim.cmd[[xmap ga <Plug>(EasyAlign)]]
 vim.cmd[[nmap ga <Plug>(EasyAlign)]]
 vim.g.easy_align_delimiters = {
@@ -113,40 +115,93 @@ vim.g.easy_align_delimiters = {
 }
 vim.cmd[[autocmd FileType markdown imap <buffer> <Bar> <Bar><Esc>m`gaip*<Bar>``A]]
 
-vim.fn['plug#'] 'bogado/file-line'
+Plug 'bogado/file-line'
 
--- vim.fn['plug#'] 'sakhnik/nvim-gdb'
+-- Plug 'sakhnik/nvim-gdb'
 
-vim.fn['plug#'] 'neovim/nvim-lspconfig'
-vim.cmd[[
-nnoremap <silent> gd    <cmd>lua vim.lsp.buf.declaration()<CR>
-nnoremap <silent> <c-]> <cmd>lua vim.lsp.buf.definition()<CR>
-nnoremap <silent> K     <cmd>lua vim.lsp.buf.hover()<CR>
-nnoremap <silent> gD    <cmd>lua vim.lsp.buf.implementation()<CR>
-nnoremap <silent> <c-k> <cmd>lua vim.lsp.buf.signature_help()<CR>
-nnoremap <silent> 1gD   <cmd>lua vim.lsp.buf.type_definition()<CR>
-nnoremap <silent> gr    <cmd>lua vim.lsp.buf.references()<CR>
-nnoremap <silent> g0    <cmd>lua vim.lsp.buf.document_symbol()<CR>
-nnoremap <silent> gW    <cmd>lua vim.lsp.buf.workspace_symbol()<CR>
-]]
+vim.lsp.set_log_level('trace');
+
+Plug 'neovim/nvim-lspconfig'
 table.insert(after, function()
 	local lspconfig = require 'lspconfig'
-	if false and executable('ccls') then
-		lspconfig.ccls.setup{}
-	elseif executable('clangd') then
-		lspconfig.clangd.setup{}
-	end
-	if executable('npm') then
-		lspconfig.html.setup{}
-		if executable('tsserver') then
-			lspconfig.tsserver.setup{}
+	local capabilities = vim.lsp.protocol.make_client_capabilities()
+	capabilities.textDocument.completion.completionItem.snippetSupport = true
+	local on_attach = function(client, bufnr)
+		local function buf_set_keymap(mode, lhs, rhs)
+			vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, { noremap = true, silent = true })
+		end
+		local function buf_set_option(...)
+			vim.api.nvim_buf_set_option(bufnr, ...)
+		end
+
+		buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+		-- Mappings.
+		buf_set_keymap('n', 'gD',    '<Cmd>lua vim.lsp.buf.declaration()<CR>')
+		buf_set_keymap('n', 'gd',    '<Cmd>lua vim.lsp.buf.definition()<CR>')
+		buf_set_keymap('n', 'K',     '<Cmd>lua vim.lsp.buf.hover()<CR>')
+		buf_set_keymap('n', 'gi',    '<Cmd>lua vim.lsp.buf.implementation()<CR>')
+		buf_set_keymap('n', '<C-k>', '<Cmd>lua vim.lsp.buf.signature_help()<CR>')
+		buf_set_keymap('n', ' wa',   '<Cmd>lua vim.lsp.buf.add_workspace_folder()<CR>')
+		buf_set_keymap('n', ' wr',   '<Cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>')
+		buf_set_keymap('n', ' wl',   '<Cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>')
+		buf_set_keymap('n', ' D',    '<Cmd>lua vim.lsp.buf.type_definition()<CR>')
+		buf_set_keymap('n', ' r',    '<Cmd>lua vim.lsp.buf.rename()<CR>')
+		buf_set_keymap('n', 'gr',    '<Cmd>lua vim.lsp.buf.references()<CR>')
+		buf_set_keymap('n', ' e',    '<Cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>')
+		buf_set_keymap('n', '[d',    '<Cmd>lua vim.lsp.diagnostic.goto_prev()<CR>')
+		buf_set_keymap('n', ']d',    '<Cmd>lua vim.lsp.diagnostic.goto_next()<CR>')
+		buf_set_keymap('n', ' q',    '<Cmd>lua vim.lsp.diagnostic.set_loclist()<CR>')
+		buf_set_keymap('n', ' a',    '<Cmd>lua vim.lsp.buf.code_action()<CR>')
+
+		-- Set some keybinds conditional on server capabilities
+		if client.resolved_capabilities.document_formatting then
+			buf_set_keymap('n', ' f', '<cmd>lua vim.lsp.buf.formatting()<CR>')
+		end
+		if client.resolved_capabilities.document_range_formatting then
+			buf_set_keymap('v', ' f', '<cmd>lua vim.lsp.buf.formatting()<CR>')
+		end
+
+		-- Set autocommands conditional on server_capabilities
+		if client.resolved_capabilities.document_highlight then
+			--lspconfig.util.nvim_multiline_command [[
+			--	augroup lsp_document_highlight
+			--		autocmd!
+			--		autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
+			--		autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
+			--	augroup END
+			--]]
 		end
 	end
+
+	if false and executable('ccls') then
+		lspconfig.ccls.setup{
+			capabilities = capabilities, on_attach = on_attach,
+		}
+	elseif executable('clangd') then
+		lspconfig.clangd.setup{
+			capabilities = capabilities, on_attach = on_attach,
+		}
+	end
+	if executable('vscode-html-languageserver') then
+		lspconfig.html.setup{
+			capabilities = capabilities, on_attach = on_attach,
+			cmd = { 'vscode-html-languageserver', '--stdio' },
+		}
+	end
+	if executable('typescript-language-server') then
+		lspconfig.tsserver.setup{
+			capabilities = capabilities, on_attach = on_attach,
+		}
+	end
 	if executable('pyls') then
-		lspconfig.pyls.setup{}
+		lspconfig.pyls.setup{
+			capabilities = capabilities, on_attach = on_attach,
+		}
 	end
 	if executable('texlab') then
 		lspconfig.texlab.setup{
+			capabilities = capabilities, on_attach = on_attach,
 			commands = {
 				TexlabForwardSearch = {
 					function()
@@ -159,7 +214,7 @@ table.insert(after, function()
 							if err then error(tostring(err)) end
 							print('Forward search ' .. vim.inspect(pos) .. ' ' .. texlab_search_status[result])
 						end)
-					end;
+					end,
 					description = 'Run synctex forward search'
 				},
 			},
@@ -182,20 +237,32 @@ table.insert(after, function()
 			},
 		}
 	end
-	if executable('dotnet') then
-		lspconfig.omnisharp.setup{}
+	if executable('omnisharp') then
+		lspconfig.omnisharp.setup{
+			capabilities = capabilities, on_attach = on_attach,
+			cmd = { 'omnisharp', '-lsp', '-hpid', tostring(vim.fn.getpid()) },
+		}
 	end
 end)
 
-vim.fn['plug#'] 'nvim-lua/completion-nvim'
-table.insert(after, function()
-	vim.g.completion_sorting = 'none'
-	vim.cmd[[autocmd BufEnter * lua require'completion'.on_attach()]]
-	vim.cmd[[autocmd CompleteDone * pclose]]
-end)
+Plug 'nvim-lua/completion-nvim'
+vim.g.completion_sorting = 'none'
+vim.g.completion_enable_snippet = 'vim-vsnip'
+vim.g.completion_matching_smart_case = 1
+vim.cmd[[autocmd BufEnter * lua require'completion'.on_attach()]]
 
-vim.fn['plug#'] 'hrsh7th/vim-vsnip'
-vim.fn['plug#'] 'hrsh7th/vim-vsnip-integ'
+--Plug 'norcalli/snippets.nvim'
+--table.insert(after, function()
+--	local snippets = require 'snippets'
+--	snippets.use_suggested_mappings()
+--	-- snippets.set_ux(require'snippets.inserters.floaty')
+--	snippets.snippets = {
+--	}
+--end)
+
+Plug 'hrsh7th/vim-vsnip'
+vim.g.vsnip_snippet_dir = vim.fn.stdpath('config')..'/vsnip'
+Plug 'hrsh7th/vim-vsnip-integ'
 vim.cmd[[
 imap <expr> <C-j>   vsnip#available(1)  ? '<Plug>(vsnip-expand)'         : '<C-j>'
 imap <expr> <C-l>   vsnip#available(1)  ? '<Plug>(vsnip-expand-or-jump)' : '<C-l>'
@@ -206,7 +273,7 @@ imap <expr> <S-Tab> vsnip#available(-1) ? '<Plug>(vsnip-jump-prev)'      : '<S-T
 smap <expr> <S-Tab> vsnip#available(-1) ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
 ]]
 
-vim.fn['plug#'] 'qpkorr/vim-renamer'
+Plug 'qpkorr/vim-renamer'
 vim.g.RenamerSupportColonWToRename = 1
 
 vim.call('plug#end')
@@ -220,5 +287,5 @@ end
 
 
 for k,v in ipairs(after) do
-	v();
+	v()
 end
