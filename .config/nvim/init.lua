@@ -119,7 +119,7 @@ Plug 'bogado/file-line'
 
 -- Plug 'sakhnik/nvim-gdb'
 
-vim.lsp.set_log_level('trace');
+-- vim.lsp.set_log_level('trace');
 
 Plug 'neovim/nvim-lspconfig'
 table.insert(after, function()
@@ -156,10 +156,10 @@ table.insert(after, function()
 
 		-- Set some keybinds conditional on server capabilities
 		if client.resolved_capabilities.document_formatting then
-			buf_set_keymap('n', ' f', '<cmd>lua vim.lsp.buf.formatting()<CR>')
+			buf_set_keymap('n', ' f', ':lua vim.lsp.buf.formatting()<CR>')
 		end
 		if client.resolved_capabilities.document_range_formatting then
-			buf_set_keymap('v', ' f', '<cmd>lua vim.lsp.buf.formatting()<CR>')
+			buf_set_keymap('v', ' f', ':lua vim.lsp.buf.range_formatting()<CR>')
 		end
 
 		-- Set autocommands conditional on server_capabilities
@@ -202,22 +202,6 @@ table.insert(after, function()
 	if executable('texlab') then
 		lspconfig.texlab.setup{
 			capabilities = capabilities, on_attach = on_attach,
-			commands = {
-				TexlabForwardSearch = {
-					function()
-						local pos = vim.api.nvim_win_get_cursor(0)
-						local params = {
-							textDocument = { uri = vim.uri_from_bufnr(0) },
-							position = { line = pos[1] - 1, character = pos[2] },
-						}
-						vim.lsp.buf_request(0, 'textDocument/forwardSearch', params, function(err, _, result, _)
-							if err then error(tostring(err)) end
-							print('Forward search ' .. vim.inspect(pos) .. ' ' .. texlab_search_status[result])
-						end)
-					end,
-					description = 'Run synctex forward search'
-				},
-			},
 			settings = {
 				latex = {
 					build = {
@@ -229,9 +213,6 @@ table.insert(after, function()
 					forwardSearch = {
 						executable = 'llpp.inotify',
 						args = { '%p' },
-					},
-					lint = {
-						onChange = false,
 					},
 				},
 			},
