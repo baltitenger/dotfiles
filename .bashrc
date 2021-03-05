@@ -49,6 +49,7 @@ alias ffmpeg='ffmpeg -hide_banner'
 alias ffplay='ffplay -hide_banner'
 alias ffprobe='ffprobe -hide_banner'
 alias pass='PASSWORD_STORE_DIR=~/.local/share/pass pass'
+alias tb='nc termbin.com 9999'
 man() {
 	LESS_TERMCAP_md=$'\e[01;91m' \
 	LESS_TERMCAP_me=$'\e[0m' \
@@ -79,4 +80,23 @@ ix() {
 		echo '^C to cancel, ^D to send.'
 	}
 	curl $opts -F f:1='<-' $* ix.io/$id
+}
+
+texview() {
+	feh -xR0 --keep-zoom-vp "https://tex.desnull.hu/$1.png" & disown $!
+	echo "https://tex.desnull.hu/$1.png"
+}
+
+camstart() {
+	adb shell -tt "su -c 'am start-activity com.pas.webcam/.Rolling'" </dev/null
+}
+
+camstream() {
+	#ffmpeg -i https://192.168.11.139:8080/video "$@" -vcodec rawvideo -pix_fmt yuv420p -f v4l2 /dev/video2
+	ffmpeg -i https://10.42.0.200:8080/video "$@" -vcodec rawvideo -pix_fmt yuv420p -f v4l2 /dev/video2
+}
+
+camstop() {
+	adb shell am force-stop com.pas.webcam
+	adb shell input keyevent KEYCODE_POWER
 }

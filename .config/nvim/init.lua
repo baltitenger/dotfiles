@@ -5,7 +5,7 @@ if vim.env.TERM ~= 'linux' then
 end
 
 vim.cmd[[
-set smartcase
+set ignorecase smartcase
 set scrolloff=3 sidescrolloff=6 lazyredraw
 set linebreak breakindent breakindentopt=shift:2,sbr showbreak=↳
 set list listchars=tab:\ \ ,extends:>,precedes:<,nbsp:~
@@ -40,6 +40,28 @@ vim.g.tex_comment_nospell = 1
 vim.g.tex_fold_enabled = 1
 vim.g.man_hardwrap = 0
 
+vim.cmd(
+	'command! DiffOrig vert new | set bt=nofile | r ++edit #'
+	..' | 0d_ | diffthis | wincmd p | diffthis')
+vim.cmd[[command! W w! /tmp/sudonvim | bel 2new +startinsert term://</tmp/sudonvim\ sudo\ tee\ >/dev/null\ %]]
+
+vim.api.nvim_set_keymap('n', '<Leader>/', '<Cmd>noh<CR>', {})
+vim.api.nvim_set_keymap('n', 'Y', 'y$', {})
+vim.api.nvim_set_keymap('v', '<Leader>w', '<Cmd>lua VisualWc()<CR>', {})
+vim.api.nvim_set_keymap('v', '<LeftRelease>', 'y', {})
+
+function VisualWc()
+	local wc = vim.fn.wordcount()
+	local lines = 1-vim.fn.line("'<")+vim.fn.line("'>")
+	print(lines, wc.visual_words, wc.visual_chars, '\n')
+end
+
+
+if vim.fn.exists('g:vscode') == 1 then
+	return
+end
+
+
 vim.cmd[[
 hi Error        guibg=DarkRed
 hi ErrorMsg     guibg=DarkRed
@@ -55,20 +77,6 @@ hi NonText      guifg=DarkCyan
 hi manUnderline guifg=Green
 hi manBold      gui=bold
 ]]
-
-vim.cmd(
-	'command! DiffOrig vert new | set bt=nofile | r ++edit #'
-	..' | 0d_ | diffthis | wincmd p | diffthis')
-
-vim.api.nvim_set_keymap('n', '<Leader>/', '<Cmd>noh<CR>', {})
-vim.api.nvim_set_keymap('n', 'Y', 'y$', {})
-vim.api.nvim_set_keymap('v', '<Leader>w', '<Cmd>lua VisualWc()<CR>', {})
-
-function VisualWc()
-	local wc = vim.fn.wordcount()
-	local lines = 1-vim.fn.line("'<")+vim.fn.line("'>")
-	print(lines, wc.visual_words, wc.visual_chars, '\n')
-end
 
 
 local function executable(cmd)
@@ -181,6 +189,7 @@ table.insert(after, function()
 	elseif executable('clangd') then
 		lspconfig.clangd.setup{
 			capabilities = capabilities, on_attach = on_attach,
+			cmd = { 'clangd', '--background-index', '--clang-tidy', '--completion-style=detailed', '--header-insertion=iwyu' };
 		}
 	end
 	if executable('vscode-html-languageserver') then
@@ -226,6 +235,21 @@ table.insert(after, function()
 	end
 end)
 
+Plug('nvim-treesitter/nvim-treesitter', { ['do'] = ':TSUpdate' })
+table.insert(after, function()
+	require'nvim-treesitter.configs'.setup{
+		ensure_installed = { 'bash', 'c', 'cpp', 'c_sharp', 'javascript', 'lua', 'python', 'typescript' },
+		highlight = {
+			enable = true,
+		},
+		--indent = {
+		--	enable = true
+		--}
+	}
+	vim.o.foldmethod = 'expr'
+	vim.o.foldexpr = 'nvim_treesitter#foldexpr()'
+end)
+
 Plug 'nvim-lua/completion-nvim'
 vim.g.completion_sorting = 'none'
 vim.g.completion_enable_snippet = 'vim-vsnip'
@@ -256,6 +280,23 @@ smap <expr> <S-Tab> vsnip#available(-1) ? '<Plug>(vsnip-jump-prev)'      : '<S-T
 
 Plug 'qpkorr/vim-renamer'
 vim.g.RenamerSupportColonWToRename = 1
+
+--Plug 'mfussenegger/nvim-dap'
+--table.insert(after, function()
+--	local dap = require('dap')
+--	dap.adapters.cpp = {
+--		name = 'lldb',
+--		type = 'executable',
+--		command = 'lldb-vscode',
+--		env = {
+--			LLDB_LAUNCH_FLAG_LAUNCH_IN_TTY = 'YES',
+--		},
+--		attach = {
+--			pidProperty = 'pid',
+--			pidSelect = 'ask',
+--		},
+--	}
+--end)
 
 vim.call('plug#end')
 

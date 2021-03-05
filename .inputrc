@@ -7,6 +7,7 @@ set enable-bracketed-paste On
 set show-all-if-unmodified On
 set visible-stats On
 set colored-stats On
+set mark-symlinked-directories On
 
 # arrow up
 "\e[A": history-substring-search-backward

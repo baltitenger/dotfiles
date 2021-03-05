@@ -1,6 +1,7 @@
 html {
 	max-width: 800px;
 	margin: auto;
+	font: 1.2em serif;
 }
 
 :not(li)>p {
