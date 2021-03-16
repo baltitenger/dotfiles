@@ -1,7 +1,8 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-PROMPT_COMMAND='printf '\''\e]0;%s@%s:%s\a'\'' "${USER}" "${HOSTNAME%%.*}" "${PWD/#$HOME/\~}"'
+PROMPT_COMMAND=($'echo -n "\e]0;$USER@${HOSTNAME%%.*}:${PWD/#$HOME/\~}\a"')
+#trap $'echo -n "\e]0;${BASH_COMMAND%% *}\a"' DEBUG
 source /usr/share/git/git-prompt.sh 2>/dev/null &&
   GIT_PS1_COMPRESSSPARSESTATE=1 GIT_PS1_SHOWSTASHSTATE=1 \
   GIT_PS1_SHOWUPSTREAM=auto GIT_PS1_STATESEPARATOR=
@@ -23,6 +24,7 @@ longps1
 eval `dircolors | sed 's/01;3/01;9/g'`
 alias config="git --git-dir=$HOME/.cfg --work-tree=$HOME"
 alias gpgfix='gpg-connect-agent updatestartuptty /bye'
+export GPG_TTY=`tty`
 alias tmus="tmux new-session -As cmus cmus"
 alias ytdl="youtube-dl --ignore-errors --output '%(title)s.%(ext)s' --no-mtime"
 vmv() { nvim +"Renamer $1"; }

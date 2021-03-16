@@ -66,8 +66,9 @@ vim.cmd[[
 hi Error        guibg=DarkRed
 hi ErrorMsg     guibg=DarkRed
 hi Folded       guibg=NONE guifg=Cyan
-hi Pmenu        guibg=DarkMagenta
-hi PmenuSel     guibg=Magenta guifg=Blue
+hi Pmenu        guibg=#222222
+hi PmenuSel     guibg=#444444 guifg=White
+hi NormalFloat  guibg=#222222 guifg=White
 hi SpellBad     NONE guifg=Red
 hi SpellCap     NONE guifg=Orange
 hi SpellRare    NONE guifg=Yellow
@@ -77,7 +78,6 @@ hi NonText      guifg=DarkCyan
 hi manUnderline guifg=Green
 hi manBold      gui=bold
 ]]
-
 
 local function executable(cmd)
 	return vim.fn.executable(cmd) == 1

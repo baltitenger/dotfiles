@@ -1,0 +1,4 @@
+If:
+  PathMatch: [ .*\.cc, .*\.cpp ]
+CompileFlags:
+  Add: [-Wall, -Wextra, -std=c++20]
