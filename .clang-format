@@ -4,3 +4,4 @@ TabWidth: 2
 UseTab: AlignWithSpaces
 AllowShortFunctionsOnASingleLine: Inline
 ColumnLimit: 100
+AlignAfterOpenBracket: false

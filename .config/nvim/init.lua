@@ -149,7 +149,7 @@ table.insert(after, function()
 		buf_set_keymap('n', 'gd',    '<Cmd>lua vim.lsp.buf.definition()<CR>')
 		buf_set_keymap('n', 'K',     '<Cmd>lua vim.lsp.buf.hover()<CR>')
 		buf_set_keymap('n', 'gi',    '<Cmd>lua vim.lsp.buf.implementation()<CR>')
-		buf_set_keymap('n', '<C-k>', '<Cmd>lua vim.lsp.buf.signature_help()<CR>')
+		buf_set_keymap('n', '<C-k>', '<Cmd>lua vim.lsp.buf.signature_help()<CR>', '<silent>')
 		buf_set_keymap('n', ' wa',   '<Cmd>lua vim.lsp.buf.add_workspace_folder()<CR>')
 		buf_set_keymap('n', ' wr',   '<Cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>')
 		buf_set_keymap('n', ' wl',   '<Cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>')
@@ -198,6 +198,18 @@ table.insert(after, function()
 			cmd = { 'vscode-html-languageserver', '--stdio' },
 		}
 	end
+	if executable('vscode-css-languageserver') then
+		lspconfig.cssls.setup{
+			capabilities = capabilities, on_attach = on_attach,
+			cmd = { 'vscode-css-languageserver', '--stdio' },
+		}
+	end
+	if executable('vscode-json-languageserver') then
+		lspconfig.jsonls.setup{
+			capabilities = capabilities, on_attach = on_attach,
+			cmd = { 'vscode-json-languageserver', '--stdio' },
+		}
+	end
 	if executable('typescript-language-server') then
 		lspconfig.tsserver.setup{
 			capabilities = capabilities, on_attach = on_attach,
@@ -238,7 +250,7 @@ end)
 Plug('nvim-treesitter/nvim-treesitter', { ['do'] = ':TSUpdate' })
 table.insert(after, function()
 	require'nvim-treesitter.configs'.setup{
-		ensure_installed = { 'bash', 'c', 'cpp', 'c_sharp', 'javascript', 'lua', 'python', 'typescript' },
+		ensure_installed = { 'c', 'cpp', 'c_sharp', 'javascript', 'lua', 'python', 'typescript' },
 		highlight = {
 			enable = true,
 		},
