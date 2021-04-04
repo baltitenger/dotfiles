@@ -66,7 +66,7 @@ man() {
 	command man "$@"
 }
 
-alias sshirssi='ssh minerva -t tmux new -An irssi irssi'
+alias sshirssi='ssh minerva -t tmux -f ~/.irssi/tmux.conf new -An irssi irssi'
 
 camurl='https://10.42.0.200:8080/video'
 camstart() {

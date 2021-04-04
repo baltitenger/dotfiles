@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Service
+Actions=pdfunite
+MimeType=application/pdf;
+ServiceTypes=KonqPopupMenu/Plugin
+
+[Desktop Action pdfunite]
+Exec=/bin/sh -ec 'pdfunite "$@" `kdialog --getsavefilename . application/pdf`' -- %F
+Name=Join pdf documents
+Icon=application-pdf
