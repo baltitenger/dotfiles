@@ -11,7 +11,7 @@ set linebreak breakindent breakindentopt=shift:2,sbr showbreak=↳
 set list listchars=tab:\ \ ,extends:>,precedes:<,nbsp:~
 set background=dark
 set laststatus=1 helpheight=0
-set title
+set title titlestring=nvim\ %f\ %m
 set mouse=nv
 set undofile formatoptions=croq1jp completeopt=menuone,noinsert,noselect
 set tabstop=2 shiftwidth=0 smartindent
@@ -24,15 +24,12 @@ set clipboard=unnamed
 ]]
 
 vim.cmd[[au FileType tex setlocal spell]]
-vim.cmd[[au FileType markdown setlocal spell ts=8 sw=3 et]]
+vim.cmd[[au FileType markdown setlocal spell]]
 vim.cmd[[au FileType markdown compiler markdown]]
 vim.cmd[[au FileType python setlocal foldmethod=indent]]
 vim.cmd[[au FileType cs compiler dotnet]]
 vim.cmd[[au BufWritePre /tmp/* setlocal noundofile]]
-vim.cmd[[au BufReadPost * if line("'\"") > 1 && line("'\"") <= line('$') && &ft !~# 'commit'
-	exe 'normal! g`"'
-endif
-]]
+vim.cmd[[au BufReadPost * if line("'\"") > 1 && line("'\"") <= line('$') && &ft !~# 'commit' | exe 'normal! g`"' | endif]]
 
 vim.g.netrw_banner = 0
 vim.g.python_recommended_style = 0
@@ -40,15 +37,33 @@ vim.g.tex_comment_nospell = 1
 vim.g.tex_fold_enabled = 1
 vim.g.man_hardwrap = 0
 
-vim.cmd(
-	'command! DiffOrig vert new | set bt=nofile | r ++edit #'
-	..' | 0d_ | diffthis | wincmd p | diffthis')
+vim.cmd[[command! DiffOrig vert new | set bt=nofile | r ++edit # | 0d_ | diffthis | wincmd p | diffthis]]
 vim.cmd[[command! W w! /tmp/sudonvim | bel 2new +startinsert term://</tmp/sudonvim\ sudo\ tee\ >/dev/null\ %]]
 
 vim.api.nvim_set_keymap('n', '<Leader>/', '<Cmd>noh<CR>', {})
 vim.api.nvim_set_keymap('n', 'Y', 'y$', {})
+vim.api.nvim_set_keymap('n', 'gb', '<Cmd>lua GitBlame()<CR>', {})
 vim.api.nvim_set_keymap('v', '<Leader>w', '<Cmd>lua VisualWc()<CR>', {})
 vim.api.nvim_set_keymap('v', '<LeftRelease>', 'y', {})
+
+function GitBlame()
+	if vim.w.gitblame_open then
+		vim.cmd('close '..vim.w.gitblame_open)
+		vim.w.gitblame_open = nil
+	else
+		vim.cmd'vnew'
+		vim.bo.buftype = 'nofile'
+		vim.cmd('r!git blame '..vim.fn.shellescape(vim.fn.expand('#'))..[[|sed 's/(//;s/\s\+[0-9]\+)\s.*$//']])
+		vim.cmd'0d_'
+		vim.bo.filetype = 'gitblame'
+		vim.cmd('vert res '..vim.fn.col('$')-1)
+		vim.wo.scrollbind = true
+		vim.cmd'winc p'
+		vim.wo.scrollbind = true
+		vim.cmd'sync'
+		vim.w.gitblame_open = vim.fn.winnr('#')
+	end
+end
 
 function VisualWc()
 	local wc = vim.fn.wordcount()
@@ -127,7 +142,7 @@ Plug 'bogado/file-line'
 
 -- Plug 'sakhnik/nvim-gdb'
 
--- vim.lsp.set_log_level('trace');
+vim.lsp.set_log_level('trace');
 
 Plug 'neovim/nvim-lspconfig'
 table.insert(after, function()
@@ -189,7 +204,7 @@ table.insert(after, function()
 	elseif executable('clangd') then
 		lspconfig.clangd.setup{
 			capabilities = capabilities, on_attach = on_attach,
-			cmd = { 'clangd', '--background-index', '--clang-tidy', '--completion-style=detailed', '--header-insertion=iwyu' };
+			cmd = { 'clangd', '--background-index', '--clang-tidy', '--completion-style=detailed', '--header-insertion=iwyu' },
 		}
 	end
 	if executable('vscode-html-languageserver') then
@@ -247,20 +262,20 @@ table.insert(after, function()
 	end
 end)
 
-Plug('nvim-treesitter/nvim-treesitter', { ['do'] = ':TSUpdate' })
-table.insert(after, function()
-	require'nvim-treesitter.configs'.setup{
-		ensure_installed = { 'c', 'cpp', 'c_sharp', 'javascript', 'lua', 'python', 'typescript' },
-		highlight = {
-			enable = true,
-		},
-		--indent = {
-		--	enable = true
-		--}
-	}
-	vim.o.foldmethod = 'expr'
-	vim.o.foldexpr = 'nvim_treesitter#foldexpr()'
-end)
+--Plug('nvim-treesitter/nvim-treesitter', { ['do'] = ':TSUpdate' })
+--table.insert(after, function()
+--	require'nvim-treesitter.configs'.setup{
+--		ensure_installed = { 'c', 'cpp', 'c_sharp', 'javascript', 'lua', 'python', 'typescript' },
+--		highlight = {
+--			enable = true,
+--		},
+--		--indent = {
+--		--	enable = true
+--		--}
+--	}
+--	vim.o.foldmethod = 'expr'
+--	vim.o.foldexpr = 'nvim_treesitter#foldexpr()'
+--end)
 
 Plug 'nvim-lua/completion-nvim'
 vim.g.completion_sorting = 'none'

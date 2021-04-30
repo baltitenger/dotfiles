@@ -10,7 +10,7 @@ HISTFILESIZE=10000
 source /usr/share/git/git-prompt.sh 2>/dev/null &&
   GIT_PS1_COMPRESSSPARSESTATE=1 GIT_PS1_SHOWSTASHSTATE=1 \
   GIT_PS1_SHOWUPSTREAM=auto GIT_PS1_STATESEPARATOR=
-SHORTPS1=$'\[\e]0;\u@\h:\w\a\]$(x=$?;((\j))&&echo -E \'\[\e[01;95m\]\j\';exit $((x==0?92:91)))\[\e[01;$?m\]\$\[\e[00m\] '
+SHORTPS1=$'\[\e]0;\u@\h:\W\a\]$(x=$?;((\j))&&echo -E \'\[\e[01;95m\]\j\';exit $((x==0?92:91)))\[\e[01;$?m\]\$\[\e[00m\] '
 longps1() {
 	PS1=$'\[\e[01;96m\][\[\e[92m\]\u\[\e[96m\]@\[\e[93m\]\h\[\e[96m\]:\[\e[94m\]\W'
 	[ `type -t __git_ps1` == function ] && PS1+=$'$(__git_ps1 \'\[\e[96m\]#\[\e[00;32m\]%s\')'
@@ -79,5 +79,10 @@ camstop() {
 }
 camstream() {
 	ffmpeg -i "$camurl" "$@" -vcodec rawvideo -pix_fmt yuv420p -f v4l2 /dev/video2 &&
-		{ camstop 1 & }
+		adb shell am force-stop com.pas.webcam
+		#{ camstop 3 & disown $!; }
+}
+
+launch() {
+	"$@" &>/dev/null & disown $!
 }
