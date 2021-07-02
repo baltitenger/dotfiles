@@ -7,7 +7,7 @@ end
 vim.cmd[[
 set ignorecase smartcase
 set scrolloff=3 sidescrolloff=6 lazyredraw
-set linebreak breakindent breakindentopt=shift:2,sbr showbreak=↳
+set linebreak breakindent
 set list listchars=tab:\ \ ,extends:>,precedes:<,nbsp:~
 set background=dark
 set laststatus=1 helpheight=0
@@ -24,9 +24,9 @@ set clipboard=unnamed
 ]]
 
 vim.cmd[[au FileType tex setlocal spell]]
-vim.cmd[[au FileType markdown setlocal spell]]
+vim.cmd[[au FileType markdown setlocal spell tw=80]]
 vim.cmd[[au FileType markdown compiler markdown]]
-vim.cmd[[au FileType python setlocal foldmethod=indent]]
+--vim.cmd[[au FileType python setlocal foldmethod=indent]]
 vim.cmd[[au FileType cs compiler dotnet]]
 vim.cmd[[au BufWritePre /tmp/* setlocal noundofile]]
 vim.cmd[[au BufReadPost * if line("'\"") > 1 && line("'\"") <= line('$') && &ft !~# 'commit' | exe 'normal! g`"' | endif]]
@@ -38,13 +38,14 @@ vim.g.tex_fold_enabled = 1
 vim.g.man_hardwrap = 0
 
 vim.cmd[[command! DiffOrig vert new | set bt=nofile | r ++edit # | 0d_ | diffthis | wincmd p | diffthis]]
-vim.cmd[[command! W w! /tmp/sudonvim | bel 2new +startinsert term://</tmp/sudonvim\ sudo\ tee\ >/dev/null\ %]]
+--vim.cmd[[command! -bang W if empty('<bang>') | echoerr 'Add ! to use sudo' | else | w! /tmp/sudonvim | bel 2new +startinsert term://</tmp/sudonvim\ sudo\ tee\ >/dev/null\ % | endif]]
 
 vim.api.nvim_set_keymap('n', '<Leader>/', '<Cmd>noh<CR>', {})
 vim.api.nvim_set_keymap('n', 'Y', 'y$', {})
 vim.api.nvim_set_keymap('n', 'gb', '<Cmd>lua GitBlame()<CR>', {})
 vim.api.nvim_set_keymap('v', '<Leader>w', '<Cmd>lua VisualWc()<CR>', {})
 vim.api.nvim_set_keymap('v', '<LeftRelease>', 'y', {})
+vim.api.nvim_set_keymap('i', '<C-BS>', '<C-W>', {})
 
 function GitBlame()
 	if vim.w.gitblame_open then
@@ -230,7 +231,11 @@ table.insert(after, function()
 			capabilities = capabilities, on_attach = on_attach,
 		}
 	end
-	if executable('pyls') then
+	if executable('pyright-langserver') then
+		lspconfig.pyright.setup{
+			capabilities = capabilities, on_attach = on_attach,
+		}
+	elseif executable('pyls') then
 		lspconfig.pyls.setup{
 			capabilities = capabilities, on_attach = on_attach,
 		}
@@ -324,6 +329,8 @@ vim.g.RenamerSupportColonWToRename = 1
 --		},
 --	}
 --end)
+
+Plug 'peterhoeg/vim-qml'
 
 vim.call('plug#end')
 

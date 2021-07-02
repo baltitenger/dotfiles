@@ -58,6 +58,7 @@ alias ffprobe='ffprobe -hide_banner'
 alias pass='PASSWORD_STORE_DIR=~/.local/share/pass pass'
 alias tb='nc termbin.com 9999'
 alias ix="curl -F 'f:1=<-' ix.io"
+alias bp="curl -F 'raw=<-' https://bpa.st/curl"
 man() {
 	LESS_TERMCAP_md=$'\e[01;91m' \
 	LESS_TERMCAP_me=$'\e[0m' \
