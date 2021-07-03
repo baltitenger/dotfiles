@@ -257,7 +257,7 @@ table.insert(after, function()
 	}
 end)
 
-lug 'nvim-lua/completion-nvim'
+Plug 'nvim-lua/completion-nvim'
 vim.g.completion_sorting = 'none'
 vim.g.completion_enable_snippet = 'vim-vsnip'
 vim.g.completion_matching_smart_case = 1
