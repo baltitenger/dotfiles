@@ -18,7 +18,7 @@ vim.opt.laststatus = 1
 vim.opt.helpheight = 0
 vim.opt.title = true
 vim.opt.titlestring = 'nvim %f %m'
-vim.opt.mouse = 'nv'
+vim.opt.mouse = 'v'
 vim.opt.undofile = true
 vim.opt.formatoptions = 'croq1jp'
 vim.opt.completeopt = { 'menuone', 'noinsert', 'noselect' }
@@ -29,7 +29,6 @@ vim.opt.foldlevelstart = 99
 vim.opt.foldmethod = 'syntax'
 vim.opt.diffopt = { 'filler', 'iwhite', 'closeoff', 'internal', 'indent-heuristic' }
 vim.opt.wildmode = { 'longest:full', 'full' }
-vim.opt.virtualedit = 'block'
 vim.opt.inccommand = 'nosplit'
 vim.opt.clipboard = 'unnamed'
 
@@ -51,6 +50,7 @@ hi Folded       guibg=NONE guifg=Cyan
 hi Pmenu        guibg=#222222
 hi PmenuSel     guibg=#444444 guifg=White
 hi NormalFloat  guibg=#222222 guifg=White
+hi FloatBorderT guifg=#222222
 hi SpellBad     NONE guifg=Red
 hi SpellCap     NONE guifg=Orange
 hi SpellRare    NONE guifg=Yellow
@@ -61,29 +61,40 @@ hi manUnderline guifg=Green
 hi manBold      gui=bold
 ]==]
 
+local floatBorder = {
+	{ '▗', 'FloatBorderT' },
+	{ '▄', 'FloatBorderT' },
+	{ '▖', 'FloatBorderT' },
+	{ '▌', 'FloatBorderT' },
+	{ '▘', 'FloatBorderT' },
+	{ '▀', 'FloatBorderT' },
+	{ '▝', 'FloatBorderT' },
+	{ '▐', 'FloatBorderT' },
+}
+
 vim.g.netrw_banner = 0
 vim.g.python_recommended_style = 0
 vim.g.tex_comment_nospell = 1
 vim.g.tex_fold_enabled = 1
-vim.g.man_hardwrap = 0
+vim.g.html_indent_script1 = 'inc'
+vim.g.html_indent_style1 = 'inc'
 
 vim.api.nvim_set_keymap('n', '<Leader>/', '<Cmd>noh<CR>', {})
 vim.api.nvim_set_keymap('n', 'Y', 'y$', {})
 vim.api.nvim_set_keymap('n', 'gb', '<Cmd>lua GitBlame()<CR>', {})
 vim.api.nvim_set_keymap('v', '<Leader>w', '<Cmd>lua VisualWc()<CR>', {})
-vim.api.nvim_set_keymap('v', '<LeftRelease>', 'y', {})
 vim.api.nvim_set_keymap('i', '<C-H>', '<C-W>', {})
 
 function SudoWrite(sure)
 	if not sure then
 		print 'Add ! to use sudo.'
 	else
-		vim.cmd([[
+		vim.cmd[[
 			w! /tmp/sudonvim
 			bel 2new
 			startinsert
-			te </tmp/sudonvim sudo tee >/dev/null ]]..vim.fn.shellescape(vim.fn.expand('%'))
-		)
+			te sudo tee #:S </tmp/sudonvim >/dev/null; rm /tmp/sudonvim
+		]]
 	end
 end
 
@@ -94,11 +105,13 @@ function GitBlame()
 	else
 		local winnr = vim.fn.winnr()
 		local width = vim.fn.winwidth(winnr)
-		vim.cmd 'vnew'
+		vim.cmd[[
+			vnew
+			r !git blame #:S | sed 's/(//;s/\s\+[0-9]\+)\s.*$//'
+			0d_
+		]]
 		vim.w.gitblame_open = winnr
 		vim.opt_local.buftype = 'nofile'
-		vim.cmd('r!git blame '..vim.fn.shellescape(vim.fn.expand('#'))..[[|sed 's/(//;s/\s\+[0-9]\+)\s.*$//']])
-		vim.cmd '0d_'
 		vim.opt_local.filetype = 'gitblame'
 		vim.opt_local.wrap = false
 		vim.cmd('vert res '..math.min(vim.fn.col('$') - 1, width / 3))
@@ -175,6 +188,9 @@ table.insert(after, function()
 	local lspconfig = require 'lspconfig'
 	local capabilities = vim.lsp.protocol.make_client_capabilities()
 	capabilities.textDocument.completion.completionItem.snippetSupport = true
+	vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+		border = floatBorder,
+	})
 	local on_attach = function(client, bufnr)
 		local function buf_set_keymap(mode, lhs, rhs)
 			vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, { noremap = true, silent = true })
@@ -210,11 +226,20 @@ table.insert(after, function()
 		if client.resolved_capabilities.document_range_formatting then
 			buf_set_keymap('v', ' f', ':lua vim.lsp.buf.range_formatting()<CR>')
 		end
+
+		-- Show signature help automatically
+		require'lsp_signature'.on_attach{
+			bind = true,
+			hint_enable = false,
+			handler_opts = {
+				border = floatBorder,
+			},
+		}
 	end
 
 	lspconfig.clangd.setup{
 		capabilities = capabilities, on_attach = on_attach,
-		cmd = { 'clangd', '--background-index', '--clang-tidy', '--completion-style=detailed', '--header-insertion=iwyu' },
+		cmd = { 'clangd', '--background-index', '--clang-tidy', '--completion-style=detailed', '--header-insertion=iwyu', '--query-driver=/usr/bin/*-gcc,/usr/bin/*-gcc,/usr/bin/*-g++' },
 	}
 	lspconfig.html.setup{
 		capabilities = capabilities, on_attach = on_attach,
@@ -237,7 +262,7 @@ table.insert(after, function()
 	lspconfig.texlab.setup{
 		capabilities = capabilities, on_attach = on_attach,
 		settings = {
-			latex = {
+			texlab = {
 				build = {
 					executable = 'latexmk',
 					args = { '-pdf', '-interaction=nonstopmode', '-synctex=1', '-lualatex', '-outdir=build', '%f' },
@@ -245,7 +270,7 @@ table.insert(after, function()
 					onSave = true,
 				},
 				forwardSearch = {
-					executable = 'llpp.inotify',
+					executable = 'okular',
 					args = { '%p' },
 				},
 			},
@@ -257,38 +282,52 @@ table.insert(after, function()
 	}
 end)
 
-Plug 'nvim-lua/completion-nvim'
-vim.g.completion_sorting = 'none'
-vim.g.completion_enable_snippet = 'vim-vsnip'
-vim.g.completion_matching_smart_case = 1
-vim.cmd[[autocmd BufEnter * lua require'completion'.on_attach()]]
-
---Plug 'norcalli/snippets.nvim'
---table.insert(after, function()
---	local snippets = require 'snippets'
---	snippets.use_suggested_mappings()
---	-- snippets.set_ux(require'snippets.inserters.floaty')
---	snippets.snippets = {
---	}
---end)
+Plug 'hrsh7th/nvim-compe'
+table.insert(after, function()
+  require'compe'.setup({
+    enabled = true,
+		autocomplete = true,
+		documentation = {
+			border = floatBorder,
+		},
+    source = {
+      path = true,
+      buffer = true,
+      nvim_lsp = true,
+			vsnip = true,
+    },
+  })
+	vim.api.nvim_set_keymap('i', '<CR>', "compe#confirm('<CR>')", { silent = true, expr = true, noremap = true })
+end)
 
 Plug 'hrsh7th/vim-vsnip'
-vim.g.vsnip_snippet_dir = vim.fn.stdpath('config')..'/vsnip'
 Plug 'hrsh7th/vim-vsnip-integ'
-vim.cmd[[
-imap <expr> <C-j>   vsnip#available(1)  ? '<Plug>(vsnip-expand)'         : '<C-j>'
-imap <expr> <C-l>   vsnip#available(1)  ? '<Plug>(vsnip-expand-or-jump)' : '<C-l>'
-smap <expr> <C-l>   vsnip#available(1)  ? '<Plug>(vsnip-expand-or-jump)' : '<C-l>'
-imap <expr> <Tab>   vsnip#available(1)  ? '<Plug>(vsnip-jump-next)'      : '<Tab>'
-smap <expr> <Tab>   vsnip#available(1)  ? '<Plug>(vsnip-jump-next)'      : '<Tab>'
-imap <expr> <S-Tab> vsnip#available(-1) ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
-smap <expr> <S-Tab> vsnip#available(-1) ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
-]]
+vim.g.vsnip_snippet_dir = vim.fn.stdpath('config')..'/vsnip'
+vim.api.nvim_set_keymap('i', '<Tab>',   "vsnip#jumpable(1)  ? '<Plug>(vsnip-jump-next)' : '<Tab>'", { expr = true})
+vim.api.nvim_set_keymap('s', '<Tab>',   "vsnip#jumpable(1)  ? '<Plug>(vsnip-jump-next)' : '<Tab>'", { expr = true})
+vim.api.nvim_set_keymap('i', '<S-Tab>', "vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<S-Tab>'", { expr = true})
+vim.api.nvim_set_keymap('s', '<S-Tab>', "vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<S-Tab>'", { expr = true})
+
+Plug 'ray-x/lsp_signature.nvim'
 
 Plug 'qpkorr/vim-renamer'
 vim.g.RenamerSupportColonWToRename = 1
 
 Plug 'peterhoeg/vim-qml'
+
+Plug('nvim-treesitter/nvim-treesitter', { ['do'] = ':TSUpdate' })
+Plug 'nvim-treesitter/playground'
+table.insert(after, function()
+	require'nvim-treesitter.configs'.setup {
+		ensure_installed = { 'javascript', },
+		highlight = {
+			enable = true,
+		},
+		indent = {
+			enable = false,
+		},
+	}
+end)
 
 vim.call('plug#end')
 

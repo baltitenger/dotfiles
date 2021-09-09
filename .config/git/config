@@ -7,19 +7,22 @@
 	tool = nvimdiff
 [difftool]
 	prompt = true
-#[difftool "nvimdiff"]
-#	cmd = nvim -d $LOCAL $REMOTE
 [merge]
 	tool = nvimdiff
 [mergetool]
 	prompt = true
-#[mergetool "nvimdiff"]
-#	cmd = nvim -d $LOCAL $REMOTE $MERGED # -c '$wincmd w' -c 'wincmd J'
-[commit]
-	gpgsign = true
 [alias]
 	lg = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
 	lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
+	co = checkout
+	sw = switch
+	c = commit
+	st = status
+	d = diff
+	sh = show
+	b = branch
+	f = fetch
+	mt = mergetool
 [init]
 	defaultBranch = master
 [filter "lfs"]

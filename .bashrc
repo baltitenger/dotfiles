@@ -1,6 +1,7 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
+unset PROMPT_COMMAND
 shopt -s globstar histappend lithist
 tabs -2 2>/dev/null
 HISTCONTROL=ignoreboth
@@ -22,9 +23,10 @@ shortps1() {
 longps1
 
 precmd() {
-	printf $'\e]0;%s\a' "${BASH_COMMAND%% *}"
+	cmd="$BASH_COMMAND"
+	while [[ "${cmd%% *}" == *=* ]]; do cmd="${cmd#* }"; done
+	printf $'\e]0;%s\a' "${cmd%% *}" >/dev/tty
 }
-trap precmd DEBUG
 
 alias config="git --git-dir=$HOME/.cfg --work-tree=$HOME"
 alias gpgfix='gpg-connect-agent updatestartuptty /bye'
@@ -55,17 +57,12 @@ alias tar='tar --totals=SIGUSR1'
 alias ffmpeg='ffmpeg -hide_banner'
 alias ffplay='ffplay -hide_banner'
 alias ffprobe='ffprobe -hide_banner'
+alias nethack='TERM=xterm nethack'
 alias pass='PASSWORD_STORE_DIR=~/.local/share/pass pass'
 alias tb='nc termbin.com 9999'
 alias ix="curl -F 'f:1=<-' ix.io"
 alias bp="curl -F 'raw=<-' https://bpa.st/curl"
-man() {
-	LESS_TERMCAP_md=$'\e[01;91m' \
-	LESS_TERMCAP_me=$'\e[0m' \
-	LESS_TERMCAP_us=$'\e[01;32m' \
-	LESS_TERMCAP_ue=$'\e[0m' \
-	command man "$@"
-}
+alias man=$'LESS_TERMCAP_md="\e[01;91m" LESS_TERMCAP_me="\e[0m" LESS_TERMCAP_us="\e[01;32m" LESS_TERMCAP_ue="\e[0m" man'
 
 alias sshirssi='ssh minerva -t tmux -f ~/.irssi/tmux.conf new -An irssi irssi'
 
@@ -87,3 +84,5 @@ camstream() {
 launch() {
 	"$@" &>/dev/null & disown $!
 }
+
+trap precmd DEBUG
