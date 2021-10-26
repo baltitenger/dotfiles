@@ -14,7 +14,7 @@ source /usr/share/git/git-prompt.sh 2>/dev/null &&
 SHORTPS1=$'\[\e]0;\u@\h:\W\a\]$(x=$?;((\j))&&echo -E \'\[\e[01;95m\]\j\';exit $((x==0?92:91)))\[\e[01;$?m\]\$\[\e[00m\] '
 longps1() {
 	PS1=$'\[\e[01;96m\][\[\e[92m\]\u\[\e[96m\]@\[\e[93m\]\h\[\e[96m\]:\[\e[94m\]\W'
-	[ `type -t __git_ps1` == function ] && PS1+=$'$(__git_ps1 \'\[\e[96m\]#\[\e[00;32m\]%s\')'
+	[ "`type -t __git_ps1`" == function ] && PS1+=$'$(__git_ps1 \'\[\e[96m\]#\[\e[00;32m\]%s\')'
 	PS1+=$'\[\e[01;96m\]]'"$SHORTPS1"
 }
 shortps1() {
@@ -23,7 +23,7 @@ shortps1() {
 longps1
 
 precmd() {
-	cmd="$BASH_COMMAND"
+	cmd="$BASH_COMMAND "
 	while [[ "${cmd%% *}" == *=* ]]; do cmd="${cmd#* }"; done
 	printf $'\e]0;%s\a' "${cmd%% *}" >/dev/tty
 }
@@ -34,7 +34,7 @@ alias tmus="tmux new-session -As cmus cmus"
 alias ytdl="youtube-dl --ignore-errors --output '%(title)s.%(ext)s' --no-mtime"
 vmv() { nvim +"Renamer $1"; }
 
-export CPPFLAGS CFLAGS CXXFLAGS LDFLAGS
+export CPPFLAGS CFLAGS CXXFLAGS LDFLAGS CC CXX
 envdbg() {
 	CPPFLAGS='-D_GLIBCXX_DEBUG'
 	CFLAGS='-pipe -fno-plt -g -fvar-tracking-assignments -Wall -Wextra'
@@ -48,7 +48,8 @@ envrel() {
 	LDFLAGS='-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now'
 }
 
-eval `dircolors | sed 's/01;3/01;9/g'`
+#eval `dircolors -b | sed 's/00;3/01;9/g'`
+eval `dircolors -b`
 alias ls='ls -F --color=auto'
 alias grep='grep --colour=auto'
 alias egrep='egrep --colour=auto'
@@ -63,6 +64,7 @@ alias tb='nc termbin.com 9999'
 alias ix="curl -F 'f:1=<-' ix.io"
 alias bp="curl -F 'raw=<-' https://bpa.st/curl"
 alias man=$'LESS_TERMCAP_md="\e[01;91m" LESS_TERMCAP_me="\e[0m" LESS_TERMCAP_us="\e[01;32m" LESS_TERMCAP_ue="\e[0m" man'
+alias armexec='bwrap --unshare-all --hostname arm-chroot --bind ~/stuff/arm-chroot / --bind ~ ~ --proc /proc --dev /dev --tmpfs /tmp'
 
 alias sshirssi='ssh minerva -t tmux -f ~/.irssi/tmux.conf new -An irssi irssi'
 

@@ -59,6 +59,7 @@ hi debugPC      guibg=DarkBlue
 hi NonText      guifg=DarkCyan
 hi manUnderline guifg=Green
 hi manBold      gui=bold
+hi link texOnlyMath NONE
 ]==]
 
 local floatBorder = {
@@ -239,7 +240,7 @@ table.insert(after, function()
 
 	lspconfig.clangd.setup{
 		capabilities = capabilities, on_attach = on_attach,
-		cmd = { 'clangd', '--background-index', '--clang-tidy', '--completion-style=detailed', '--header-insertion=iwyu', '--query-driver=/usr/bin/*-gcc,/usr/bin/*-gcc,/usr/bin/*-g++' },
+		cmd = { 'clangd', '--background-index', '--clang-tidy', '--completion-style=detailed', '--header-insertion=iwyu', '--query-driver=/usr/bin/*-gcc,/usr/bin/*-g++' },
 	}
 	lspconfig.html.setup{
 		capabilities = capabilities, on_attach = on_attach,

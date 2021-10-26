@@ -1,4 +1,4 @@
-*/.clangd/
-*/.cache/clangd/
-/build/
-*/compile_commands.json
+.clangd/
+.cache/
+build/
+compile_commands.json
