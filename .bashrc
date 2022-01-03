@@ -31,7 +31,7 @@ precmd() {
 alias config="git --git-dir=$HOME/.cfg --work-tree=$HOME"
 alias gpgfix='gpg-connect-agent updatestartuptty /bye'
 alias tmus="tmux new-session -As cmus cmus"
-alias ytdl="youtube-dl --ignore-errors --output '%(title)s.%(ext)s' --no-mtime"
+alias ytdl="yt-dlp --ignore-errors --output '%(title)s.%(ext)s' --no-mtime"
 vmv() { nvim +"Renamer $1"; }
 
 export CPPFLAGS CFLAGS CXXFLAGS LDFLAGS CC CXX

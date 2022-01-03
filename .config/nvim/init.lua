@@ -187,12 +187,14 @@ Plug 'bogado/file-line'
 Plug 'neovim/nvim-lspconfig'
 table.insert(after, function()
 	local lspconfig = require 'lspconfig'
-	local capabilities = vim.lsp.protocol.make_client_capabilities()
-	capabilities.textDocument.completion.completionItem.snippetSupport = true
+	lspconfig.util.default_config.capabilities
+		= vim.lsp.protocol.make_client_capabilities()
+	lspconfig.util.default_config.capabilities
+		.textDocument.completion.completionItem.snippetSupport = true
 	vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
 		border = floatBorder,
 	})
-	local on_attach = function(client, bufnr)
+	lspconfig.util.default_config.on_attach = function(client, bufnr)
 		local function buf_set_keymap(mode, lhs, rhs)
 			vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, { noremap = true, silent = true })
 		end
@@ -239,29 +241,21 @@ table.insert(after, function()
 	end
 
 	lspconfig.clangd.setup{
-		capabilities = capabilities, on_attach = on_attach,
 		cmd = { 'clangd', '--background-index', '--clang-tidy', '--completion-style=detailed', '--header-insertion=iwyu', '--query-driver=/usr/bin/*-gcc,/usr/bin/*-g++' },
 	}
 	lspconfig.html.setup{
-		capabilities = capabilities, on_attach = on_attach,
 		cmd = { 'vscode-html-languageserver', '--stdio' },
 	}
 	lspconfig.cssls.setup{
-		capabilities = capabilities, on_attach = on_attach,
 		cmd = { 'vscode-css-languageserver', '--stdio' },
 	}
 	lspconfig.jsonls.setup{
-		capabilities = capabilities, on_attach = on_attach,
 		cmd = { 'vscode-json-languageserver', '--stdio' },
 	}
-	lspconfig.tsserver.setup{
-		capabilities = capabilities, on_attach = on_attach,
-	}
-	lspconfig.pyright.setup{
-		capabilities = capabilities, on_attach = on_attach,
-	}
+	lspconfig.tsserver.setup{}
+	lspconfig.pyright.setup{}
+	--lspconfig.jedi_language_server.setup{}
 	lspconfig.texlab.setup{
-		capabilities = capabilities, on_attach = on_attach,
 		settings = {
 			texlab = {
 				build = {
@@ -278,7 +272,6 @@ table.insert(after, function()
 		},
 	}
 	lspconfig.omnisharp.setup{
-		capabilities = capabilities, on_attach = on_attach,
 		cmd = { 'omnisharp', '-lsp', '-hpid', tostring(vim.fn.getpid()) },
 	}
 end)
@@ -320,7 +313,7 @@ Plug('nvim-treesitter/nvim-treesitter', { ['do'] = ':TSUpdate' })
 Plug 'nvim-treesitter/playground'
 table.insert(after, function()
 	require'nvim-treesitter.configs'.setup {
-		ensure_installed = { 'javascript', },
+		ensure_installed = { 'c', 'cpp', 'html', 'css', 'javascript' },
 		highlight = {
 			enable = true,
 		},

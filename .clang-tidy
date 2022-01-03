@@ -1,1 +1,4 @@
-Checks: '-*,bugprone-*,cert-*,clang-analyzer-*,modernize-*,-modernize-use-trailing-return-type,-modernize-avoid-c-arrays,-modernize-use-default-member-init,performance-*,readability-*,-readability-magic-numbers,-readability-isolate-declaration,-readability-implicit-bool-conversion,-readability-braces-around-statements,-cert-err34-c,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling'
+Checks: '-*,bugprone-*,cert-*,clang-analyzer-*,modernize-*,-modernize-use-trailing-return-type,-modernize-avoid-c-arrays,-modernize-use-default-member-init,performance-*,readability-*,-readability-magic-numbers,-readability-isolate-declaration,-readability-implicit-bool-conversion,-readability-braces-around-statements,-cert-err34-c,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-readability-else-after-return,-performance-no-int-to-ptr,-bugprone-easily-swappable-parameters'
+CheckOptions:
+  - key: readability-function-cognitive-complexity.IgnoreMacros
+    value: true
