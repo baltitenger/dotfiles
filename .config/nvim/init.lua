@@ -80,11 +80,16 @@ vim.g.tex_fold_enabled = 1
 vim.g.html_indent_script1 = 'inc'
 vim.g.html_indent_style1 = 'inc'
 
-vim.api.nvim_set_keymap('n', '<Leader>/', '<Cmd>noh<CR>', {})
-vim.api.nvim_set_keymap('n', 'Y', 'y$', {})
-vim.api.nvim_set_keymap('n', 'gb', '<Cmd>lua GitBlame()<CR>', {})
-vim.api.nvim_set_keymap('v', '<Leader>w', '<Cmd>lua VisualWc()<CR>', {})
-vim.api.nvim_set_keymap('i', '<C-H>', '<C-W>', {})
+vim.api.nvim_set_keymap('n', '<Leader>/', '<Cmd>noh<CR>', { noremap = true })
+vim.api.nvim_set_keymap('n', 'Y', 'y$', { noremap = true })
+vim.api.nvim_set_keymap('n', 'gb', '<Cmd>lua GitBlame()<CR>', { noremap = true })
+vim.api.nvim_set_keymap('v', '<Leader>w', '<Cmd>lua VisualWc()<CR>', { noremap = true })
+vim.api.nvim_set_keymap('i', '<C-H>', '<C-W>', { noremap = true })
+vim.api.nvim_set_keymap('n', 'gcc', '<Cmd>set opfunc=v:lua.ToggleComment<CR>g@l', { noremap = true })
+vim.api.nvim_set_keymap('n', 'gc',  '<Cmd>set opfunc=v:lua.ToggleComment<CR>g@', { noremap = true })
+vim.api.nvim_set_keymap('v', 'gc',  '<Cmd>set opfunc=v:lua.ToggleComment<CR>g@', { noremap = true })
+vim.api.nvim_set_keymap('n', '<C-_>', 'gcc', {})
+vim.api.nvim_set_keymap('v', '<C-_>', 'gc', {})
 
 function SudoWrite(sure)
 	if not sure then
@@ -130,6 +135,62 @@ function VisualWc()
 	print(lines, wc.visual_words, wc.visual_chars, '\n')
 end
 
+comment_map = {
+	c          = '//',
+	cpp        = '//',
+	go         = '//',
+	java       = '//',
+	javascript = '//',
+	php        = '//',
+	rust       = '//',
+	scala      = '//',
+	conf       = '#',
+	desktop    = '#',
+	fstab      = '#',
+	python     = '#',
+	ruby       = '#',
+	sh         = '#',
+	bat        = 'REM',
+	lua        = '--',
+	mail       = '>',
+	tex        = '%',
+	vim        = '"',
+}
+
+function ToggleComment(type)
+	local prefix = comment_map[vim.o.filetype]
+	if not prefix then
+		return vim.api.nvim_err_writeln 'No comment prefix defined for this filetype!'
+	end
+	local first = vim.fn.line "'[" - 1
+	local last  = vim.fn.line "']"
+	local lines = vim.api.nvim_buf_get_lines(0, first, last, true)
+	local all_comment = true
+	local uncommented = {}
+	local shallowest = 1e99
+	for i,line in ipairs(lines) do
+		local depth = line:find('[^%s]')
+		if depth then
+			shallowest = math.min(shallowest, depth)
+			local res, success = line:gsub('^(%s*)' .. vim.pesc(prefix) .. ' ?', '%1', 1)
+			if success == 0 then
+				all_comment = false
+			end
+			table.insert(uncommented, res)
+		else
+			table.insert(uncommented, line)
+		end
+	end
+	if all_comment then
+		return vim.api.nvim_buf_set_lines(0, first, last, true, uncommented);
+	end
+	for i,line in ipairs(lines) do
+		if line:len() >= shallowest - 1 then
+			lines[i] = line:sub(0, shallowest - 1) .. prefix .. ' ' .. line:sub(shallowest)
+		end
+	end
+	vim.api.nvim_buf_set_lines(0, first, last, true, lines);
+end
 
 if vim.fn.exists('g:vscode') == 1 then return end
 
@@ -209,17 +270,17 @@ table.insert(after, function()
 		buf_set_keymap('n', 'gd',    '<Cmd>lua vim.lsp.buf.definition()<CR>')
 		buf_set_keymap('n', 'K',     '<Cmd>lua vim.lsp.buf.hover()<CR>')
 		buf_set_keymap('n', 'gi',    '<Cmd>lua vim.lsp.buf.implementation()<CR>')
-		buf_set_keymap('n', '<C-k>', '<Cmd>lua vim.lsp.buf.signature_help()<CR>', '<silent>')
+		buf_set_keymap('n', '<C-k>', '<Cmd>lua vim.lsp.buf.signature_help()<CR>')
 		buf_set_keymap('n', ' wa',   '<Cmd>lua vim.lsp.buf.add_workspace_folder()<CR>')
 		buf_set_keymap('n', ' wr',   '<Cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>')
 		buf_set_keymap('n', ' wl',   '<Cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>')
 		buf_set_keymap('n', ' D',    '<Cmd>lua vim.lsp.buf.type_definition()<CR>')
 		buf_set_keymap('n', ' r',    '<Cmd>lua vim.lsp.buf.rename()<CR>')
 		buf_set_keymap('n', 'gr',    '<Cmd>lua vim.lsp.buf.references()<CR>')
-		buf_set_keymap('n', ' e',    '<Cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>')
-		buf_set_keymap('n', '[d',    '<Cmd>lua vim.lsp.diagnostic.goto_prev()<CR>')
-		buf_set_keymap('n', ']d',    '<Cmd>lua vim.lsp.diagnostic.goto_next()<CR>')
-		buf_set_keymap('n', ' q',    '<Cmd>lua vim.lsp.diagnostic.set_loclist()<CR>')
+		buf_set_keymap('n', ' e',    '<Cmd>lua vim.diagnostic.open_float()<CR>')
+		buf_set_keymap('n', '[d',    '<Cmd>lua vim.diagnostic.goto_prev()<CR>')
+		buf_set_keymap('n', ']d',    '<Cmd>lua vim.diagnostic.goto_next()<CR>')
+		buf_set_keymap('n', ' q',    '<Cmd>lua vim.diagnostic.setloclist()<CR>')
 		buf_set_keymap('n', ' a',    '<Cmd>lua vim.lsp.buf.code_action()<CR>')
 
 		-- Set some keybinds conditional on server capabilities
@@ -274,6 +335,7 @@ table.insert(after, function()
 	lspconfig.omnisharp.setup{
 		cmd = { 'omnisharp', '-lsp', '-hpid', tostring(vim.fn.getpid()) },
 	}
+	lspconfig.rust_analyzer.setup{}
 end)
 
 Plug 'hrsh7th/nvim-compe'
