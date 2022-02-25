@@ -24,6 +24,7 @@
 	b = branch
 	f = fetch
 	mt = mergetool
+	dt = difftool
 	wt = worktree
 [init]
 	defaultBranch = master

@@ -44,15 +44,13 @@ vmv() { nvim +"Renamer $1"; }
 
 export CPPFLAGS CFLAGS CXXFLAGS LDFLAGS CC CXX
 envdbg() {
-	CPPFLAGS='-D_GLIBCXX_DEBUG'
-	CFLAGS='-pipe -fno-plt -g -fvar-tracking-assignments -Wall -Wextra'
-	CXXFLAGS='-pipe -fno-plt -g -fvar-tracking-assignments -Wall -Wextra -std=c++20'
+	CFLAGS='-pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra -g -std=c11'
+	CXXFLAGS='-pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra -Wp,-D_GLIBCXX_DEBUG -g -std=c++20'
 	LDFLAGS='-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now'
 }
 envrel() {
-	CPPFLAGS='-D_FORTIFY_SOURCE=2'
-	CFLAGS='-O2 -pipe -fno-plt -Wall -Wextra'
-	CXXFLAGS='-O2 -pipe -fno-plt -Wall -Wextra -std=c++20'
+	CFLAGS='-O2 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra -std=c11'
+	CXXFLAGS='-O2 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra -Wp,-D_GLIBCXX_ASSERTIONS -std=c++20'
 	LDFLAGS='-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now'
 }
 
