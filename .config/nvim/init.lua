@@ -20,7 +20,7 @@ vim.opt.title = true
 vim.opt.titlestring = 'nvim %f %m'
 vim.opt.mouse = 'v'
 vim.opt.undofile = true
-vim.opt.formatoptions = 'croq1jp'
+vim.opt.formatoptions = 'croq1j'
 vim.opt.completeopt = { 'menuone', 'noinsert', 'noselect' }
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 0
@@ -40,6 +40,7 @@ au FileType markdown compiler markdown
 au FileType cs compiler dotnet
 au BufWritePre /tmp/* setlocal noundofile
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line('$') && &ft !~# 'commit' | exe 'normal! g`"' | endif
+au BufNewFile,BufRead *.zig setf zig
 
 com! DiffOrig vert new | set bt=nofile | r ++edit # | 0d_ | diffthis | wincmd p | diffthis
 com! -bang W lua SudoWrite('<bang>' == '!')
@@ -77,6 +78,7 @@ vim.g.netrw_banner = 0
 vim.g.python_recommended_style = 0
 vim.g.tex_comment_nospell = 1
 vim.g.tex_fold_enabled = 1
+vim.g.tex_flavor = 'latex'
 vim.g.html_indent_script1 = 'inc'
 vim.g.html_indent_style1 = 'inc'
 
@@ -138,6 +140,7 @@ end
 comment_map = {
 	c          = '//',
 	cpp        = '//',
+	cs         = '//',
 	go         = '//',
 	java       = '//',
 	javascript = '//',
@@ -321,7 +324,15 @@ table.insert(after, function()
 			texlab = {
 				build = {
 					executable = 'latexmk',
-					args = { '-pdf', '-interaction=nonstopmode', '-synctex=1', '-lualatex', '-outdir=build', '%f' },
+					args = {
+						'-pdf',
+						'-interaction=nonstopmode',
+						'-synctex=1',
+						'-lualatex',
+						-- '-outdir=build',
+						'-latexoption=-cnf-line=shell_escape_commands=${shell_escape_commands},dot,neato,texcount',
+						'%f'
+					},
 					outputDirectory = 'build',
 					onSave = true,
 				},

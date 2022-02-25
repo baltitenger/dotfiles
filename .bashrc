@@ -23,14 +23,22 @@ shortps1() {
 longps1
 
 precmd() {
-	cmd="$BASH_COMMAND "
-	while [[ "${cmd%% *}" == *=* ]]; do cmd="${cmd#* }"; done
+	local cmd
+	if [ "${BASH_COMMAND% *}" == fg ]; then
+		local j=${BASH_COMMAND##fg*( )}
+		cmd="$(tr '\0' ' ' <"/proc/$(jobs -p ${j:-%+})/cmdline")"
+	else
+		cmd="$BASH_COMMAND "
+		while [[ "${cmd%% *}" == *=* ]]; do
+			cmd="${cmd#* }"
+		done
+	fi
 	printf $'\e]0;%s\a' "${cmd%% *}" >/dev/tty
 }
 
 alias config="git --git-dir=$HOME/.cfg --work-tree=$HOME"
 alias gpgfix='gpg-connect-agent updatestartuptty /bye'
-alias tmus="tmux new-session -As cmus cmus"
+alias tmus="tmux new-session -As cmus 'tmux set status off && tmux set set-titles-string \\#{pane_title} && cmus'"
 alias ytdl="yt-dlp --ignore-errors --output '%(title)s.%(ext)s' --no-mtime"
 vmv() { nvim +"Renamer $1"; }
 
@@ -64,8 +72,8 @@ alias tb='nc termbin.com 9999'
 alias ix="curl -F 'f:1=<-' ix.io"
 alias bp="curl -F 'raw=<-' https://bpa.st/curl"
 alias man=$'LESS_TERMCAP_md="\e[01;91m" LESS_TERMCAP_me="\e[0m" LESS_TERMCAP_us="\e[01;32m" LESS_TERMCAP_ue="\e[0m" man'
+alias sudo='sudo '
 alias armexec='bwrap --unshare-all --hostname arm-chroot --bind ~/stuff/arm-chroot / --bind ~ ~ --proc /proc --dev /dev --tmpfs /tmp'
-
 alias sshirssi='ssh minerva -t tmux -f ~/.irssi/tmux.conf new -An irssi irssi'
 
 camurl='https://10.42.0.200:8080/video'
@@ -81,10 +89,6 @@ camstream() {
 	ffmpeg -i "$camurl" "$@" -vcodec rawvideo -pix_fmt yuv420p -f v4l2 /dev/video2 &&
 		adb shell am force-stop com.pas.webcam
 		#{ camstop 3 & disown $!; }
-}
-
-launch() {
-	"$@" &>/dev/null & disown $!
 }
 
 trap precmd DEBUG

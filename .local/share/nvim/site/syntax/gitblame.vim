@@ -5,8 +5,8 @@ endif
 
 syn match gitblamePadding '^^*' contained
 syn match gitblameHash    '^^*\x*' contains=gitblamePadding
-syn match gitblameDate    '\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d +\d\d\d\d$'
-syn match gitblameNotcomm '^00000000 Not Committed Yet'
+syn match gitblameDate    '\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d [+-]\d\d\d\d$'
+syn match gitblameNotcomm '^0\+ Not Committed Yet'
 
 hi def link gitblamePadding Special
 hi def link gitblameHash    Label
