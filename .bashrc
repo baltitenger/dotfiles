@@ -25,7 +25,7 @@ longps1
 precmd() {
 	local cmd
 	if [ "${BASH_COMMAND% *}" == fg ]; then
-		local j=${BASH_COMMAND##fg*( )}
+		local j="${BASH_COMMAND##fg*( )}"
 		cmd="$(tr '\0' ' ' <"/proc/$(jobs -p ${j:-%+})/cmdline")"
 	else
 		cmd="$BASH_COMMAND "
@@ -33,6 +33,7 @@ precmd() {
 			cmd="${cmd#* }"
 		done
 	fi
+	cmd="${cmd#sudo }"
 	printf $'\e]0;%s\a' "${cmd%% *}" >/dev/tty
 }
 
@@ -44,12 +45,12 @@ vmv() { nvim +"Renamer $1"; }
 
 export CPPFLAGS CFLAGS CXXFLAGS LDFLAGS CC CXX
 envdbg() {
-	CFLAGS='-pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra -g -std=c11'
-	CXXFLAGS='-pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra -Wp,-D_GLIBCXX_DEBUG -g -std=c++20'
+	CFLAGS='-pipe -fno-plt -Wall -Wextra -g'
+	CXXFLAGS='-pipe -fno-plt -Wall -Wextra -Wp,-D_GLIBCXX_DEBUG -g -std=c++20'
 	LDFLAGS='-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now'
 }
 envrel() {
-	CFLAGS='-O2 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra -std=c11'
+	CFLAGS='-O2 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra'
 	CXXFLAGS='-O2 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra -Wp,-D_GLIBCXX_ASSERTIONS -std=c++20'
 	LDFLAGS='-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now'
 }
@@ -71,8 +72,19 @@ alias ix="curl -F 'f:1=<-' ix.io"
 alias bp="curl -F 'raw=<-' https://bpa.st/curl"
 alias man=$'LESS_TERMCAP_md="\e[01;91m" LESS_TERMCAP_me="\e[0m" LESS_TERMCAP_us="\e[01;32m" LESS_TERMCAP_ue="\e[0m" man'
 alias sudo='sudo '
-alias armexec='bwrap --unshare-all --hostname arm-chroot --bind ~/stuff/arm-chroot / --bind ~ ~ --proc /proc --dev /dev --tmpfs /tmp'
+# alias armexec="bwrap --unshare-ipc --unshare-pid --unshare-uts --unshare-cgroup --hostname arm-chroot \
+# --bind ~/stuff/arm-chroot / --bind ~ ~ --proc /proc --dev /dev --tmpfs /tmp --tmpfs /run \
+# --ro-bind /usr/{,host/}bin --ro-bind /usr/{,host/}include --ro-bind /usr/{,host/}lib --ro-bind /usr/{,host/}share \
+# --ro-bind /usr/lib/ld-linux-x86-64.so.2{,} --ro-bind /etc/resolv.conf /run/systemd/resolve/resolv.conf \
+# --setenv LD_LIBRARY_PATH '/usr/host/\$LIB' --setenv PATH \"/usr/override/bin:/usr/host/bin:\$PATH\""
+alias armexec='bwrap --unshare-ipc --unshare-pid --unshare-uts --unshare-cgroup --hostname arm-chroot \
+--bind ~/stuff/arm-chroot / --bind ~ ~ --proc /proc --dev /dev --tmpfs /tmp --tmpfs /run \
+--ro-bind /etc/resolv.conf /run/systemd/resolve/resolv.conf --bind /mnt /mnt'
+alias aarch64exec='bwrap --unshare-ipc --unshare-pid --unshare-uts --unshare-cgroup --hostname aarch64-chroot \
+--bind ~/stuff/aarch64-chroot / --bind ~ ~ --proc /proc --dev /dev --tmpfs /tmp --tmpfs /run \
+--ro-bind /etc/resolv.conf /run/systemd/resolve/resolv.conf --bind /mnt /mnt'
 alias sshirssi='ssh minerva -t tmux -f ~/.irssi/tmux.conf new -An irssi irssi'
+alias pacdiff='DIFFPROG=nvim\ -d pacdiff'
 
 camurl='https://10.42.0.200:8080/video'
 camstart() {

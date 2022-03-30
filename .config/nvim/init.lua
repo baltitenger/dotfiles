@@ -150,6 +150,7 @@ comment_map = {
 	conf       = '#',
 	desktop    = '#',
 	fstab      = '#',
+	make       = '#',
 	python     = '#',
 	ruby       = '#',
 	sh         = '#',
@@ -248,6 +249,9 @@ Plug 'bogado/file-line'
 
 -- vim.lsp.set_log_level('trace');
 
+local test_ns = vim.api.nvim_create_namespace('test')
+vim.cmd('hi! def Dim guifg=grey')
+
 Plug 'neovim/nvim-lspconfig'
 table.insert(after, function()
 	local lspconfig = require 'lspconfig'
@@ -255,9 +259,32 @@ table.insert(after, function()
 		= vim.lsp.protocol.make_client_capabilities()
 	lspconfig.util.default_config.capabilities
 		.textDocument.completion.completionItem.snippetSupport = true
-	vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+	vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, {
 		border = floatBorder,
 	})
+	vim.lsp.handlers['textDocument/publishDiagnostics'] = function(_, result, ctx, config)
+		local bufnr = vim.uri_to_bufnr(result.uri)
+		if not bufnr then
+			return
+		end
+		vim.api.nvim_buf_clear_namespace(bufnr, test_ns, 0, -1)
+		local real_diags = {}
+		for _, diag in pairs(result.diagnostics) do
+			if diag.severity == vim.lsp.protocol.DiagnosticSeverity.Hint
+					and vim.tbl_contains(diag.tags, vim.lsp.protocol.DiagnosticTag.Unnecessary) then
+				pcall(vim.api.nvim_buf_set_extmark, bufnr, test_ns,
+						diag.range.start.line, diag.range.start.character, {
+					end_row = diag.range['end'].line,
+					end_col = diag.range['end'].character,
+					hl_group = 'Dim',
+				})
+			else
+				table.insert(real_diags, diag)
+			end
+		end
+		result.diagnostics = real_diags
+		vim.lsp.diagnostic.on_publish_diagnostics(_, result, ctx, config)
+	end
 	lspconfig.util.default_config.on_attach = function(client, bufnr)
 		local function buf_set_keymap(mode, lhs, rhs)
 			vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, { noremap = true, silent = true })
@@ -302,6 +329,12 @@ table.insert(after, function()
 				border = floatBorder,
 			},
 		}
+	end
+
+	local oldnotify = vim.notify
+	vim.notify = function(msg, level, opts)
+		if vim.startswith(msg, 'Spawning language server with cmd: ') then return end
+		oldnotify(msg, level, opts)
 	end
 
 	lspconfig.clangd.setup{
@@ -349,6 +382,8 @@ table.insert(after, function()
 	lspconfig.rust_analyzer.setup{}
 end)
 
+Plug 'ray-x/lsp_signature.nvim'
+
 Plug 'hrsh7th/nvim-compe'
 table.insert(after, function()
   require'compe'.setup({
@@ -375,8 +410,6 @@ vim.api.nvim_set_keymap('s', '<Tab>',   "vsnip#jumpable(1)  ? '<Plug>(vsnip-jump
 vim.api.nvim_set_keymap('i', '<S-Tab>', "vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<S-Tab>'", { expr = true})
 vim.api.nvim_set_keymap('s', '<S-Tab>', "vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<S-Tab>'", { expr = true})
 
-Plug 'ray-x/lsp_signature.nvim'
-
 Plug 'qpkorr/vim-renamer'
 vim.g.RenamerSupportColonWToRename = 1
 
@@ -392,6 +425,7 @@ table.insert(after, function()
 		},
 		indent = {
 			enable = false,
+			disable = { 'python' },
 		},
 	}
 end)
