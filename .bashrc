@@ -11,11 +11,12 @@ HISTFILESIZE=10000
 source /usr/share/git/git-prompt.sh 2>/dev/null &&
   GIT_PS1_COMPRESSSPARSESTATE=1 GIT_PS1_SHOWSTASHSTATE=1 \
   GIT_PS1_SHOWUPSTREAM=auto GIT_PS1_STATESEPARATOR=
-SHORTPS1=$'\[\e]0;\u@\h:\W\a\]$(x=$?;((\j))&&echo -E \'\[\e[01;95m\]\j\';exit $((x==0?92:91)))\[\e[01;$?m\]\$\[\e[00m\] '
+SHORTPS1=$'\[\e]0;\u@\h:\W\a\]$(x=$?;((\j))&&echo -E \'\[\e[1;35m\]\j\';exit $((x==0?32:31)))\[\e[1;$?m\]\$\[\e[0m\] '
+[ -n "$SWAYSOCK" ] && SHORTPS1=$'\[\e]7;file://$PWD\a\]'"$SHORTPS1"
 longps1() {
-	PS1=$'\[\e[01;96m\][\[\e[92m\]\u\[\e[96m\]@\[\e[93m\]\h\[\e[96m\]:\[\e[94m\]\W'
-	[ "`type -t __git_ps1`" == function ] && PS1+=$'$(__git_ps1 \'\[\e[96m\]#\[\e[00;32m\]%s\')'
-	PS1+=$'\[\e[01;96m\]]'"$SHORTPS1"
+	PS1=$'\[\e[1;36m\][\[\e[32m\]\u\[\e[36m\]@\[\e[33m\]\h\[\e[36m\]:\[\e[34m\]\W'
+	[ "`type -t __git_ps1`" == function ] && PS1+=$'$(__git_ps1 \'\[\e[36m\]#\[\e[00;32m\]%s\')'
+	PS1+=$'\[\e[1;36m\]]'"$SHORTPS1"
 }
 shortps1() {
 	PS1="$SHORTPS1"
@@ -58,9 +59,10 @@ envrel() {
 #eval `dircolors -b | sed 's/00;3/01;9/g'`
 eval `dircolors -b`
 alias ls='ls -F --color=auto'
-alias grep='grep --colour=auto'
-alias egrep='egrep --colour=auto'
-alias fgrep='fgrep --colour=auto'
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias diff='diff --color=auto'
 alias tar='tar --totals=SIGUSR1'
 alias ffmpeg='ffmpeg -hide_banner'
 alias ffplay='ffplay -hide_banner'
@@ -85,6 +87,10 @@ alias aarch64exec='bwrap --unshare-ipc --unshare-pid --unshare-uts --unshare-cgr
 --ro-bind /etc/resolv.conf /run/systemd/resolve/resolv.conf --bind /mnt /mnt'
 alias sshirssi='ssh minerva -t tmux -f ~/.irssi/tmux.conf new -An irssi irssi'
 alias pacdiff='DIFFPROG=nvim\ -d pacdiff'
+alias xfreerdp='xfreerdp /floatbar:sticky:off,show:always /workarea -decorations /drive:share,"$HOME/Downloads"'
+alias wlfreerdp='swaymsg -t get_tree | jq -r '\''recurse(.nodes[])|select(.focused).rect|"\(.width)x\(.height)"'\'' | xargs -I{} wlfreerdp /size:{}'
+alias sway='TERMINAL="foot -dwarning" QT_QPA_PLATFORMTHEME=kde XDG_CURRENT_DESKTOP=sway systemd-cat sway'
+alias ytmmix='mpv --vid=no --ytdl-raw-options=cookies-from-browser=chromium+gnomekeyring ytdl://RDTMAK5uy_kset8DisdE7LSD4TNjEVvrKRTmG7a56sY'
 
 camurl='https://10.42.0.200:8080/video'
 camstart() {

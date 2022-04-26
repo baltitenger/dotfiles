@@ -82,17 +82,6 @@ vim.g.tex_flavor = 'latex'
 vim.g.html_indent_script1 = 'inc'
 vim.g.html_indent_style1 = 'inc'
 
-vim.api.nvim_set_keymap('n', '<Leader>/', '<Cmd>noh<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', 'Y', 'y$', { noremap = true })
-vim.api.nvim_set_keymap('n', 'gb', '<Cmd>lua GitBlame()<CR>', { noremap = true })
-vim.api.nvim_set_keymap('v', '<Leader>w', '<Cmd>lua VisualWc()<CR>', { noremap = true })
-vim.api.nvim_set_keymap('i', '<C-H>', '<C-W>', { noremap = true })
-vim.api.nvim_set_keymap('n', 'gcc', '<Cmd>set opfunc=v:lua.ToggleComment<CR>g@l', { noremap = true })
-vim.api.nvim_set_keymap('n', 'gc',  '<Cmd>set opfunc=v:lua.ToggleComment<CR>g@', { noremap = true })
-vim.api.nvim_set_keymap('v', 'gc',  '<Cmd>set opfunc=v:lua.ToggleComment<CR>g@', { noremap = true })
-vim.api.nvim_set_keymap('n', '<C-_>', 'gcc', {})
-vim.api.nvim_set_keymap('v', '<C-_>', 'gc', {})
-
 function SudoWrite(sure)
 	if not sure then
 		print 'Add ! to use sudo.'
@@ -143,7 +132,11 @@ comment_map = {
 	cs         = '//',
 	go         = '//',
 	java       = '//',
+	jsonc      = '//',
 	javascript = '//',
+	javascriptreact = '//',
+	typescript = '//',
+	typescriptreact = '//',
 	php        = '//',
 	rust       = '//',
 	scala      = '//',
@@ -154,6 +147,7 @@ comment_map = {
 	python     = '#',
 	ruby       = '#',
 	sh         = '#',
+	i3config   = '#',
 	bat        = 'REM',
 	lua        = '--',
 	mail       = '>',
@@ -195,6 +189,23 @@ function ToggleComment(type)
 	end
 	vim.api.nvim_buf_set_lines(0, first, last, true, lines);
 end
+
+vim.keymap.set('n', '<Leader>/', '<Cmd>noh<CR>')
+vim.keymap.set('n', 'Y', 'y$')
+vim.keymap.set('n', 'gb', GitBlame)
+-- vim.keymap.set('v', '<Leader>w', VisualWc)
+vim.keymap.set('v', '<Leader>w', '<Cmd>lua VisualWc()<CR>') -- should convert to an operator probably
+vim.keymap.set('i', '<C-H>', '<C-W>')
+vim.keymap.set('n', 'gcc', '<Cmd>set opfunc=v:lua.ToggleComment<CR>g@l')
+vim.keymap.set('n', 'gc',  '<Cmd>set opfunc=v:lua.ToggleComment<CR>g@')
+vim.keymap.set('v', 'gc',  '<Cmd>set opfunc=v:lua.ToggleComment<CR>g@')
+vim.keymap.set('n', '<C-/>', 'gcc', { remap = true})
+vim.keymap.set('v', '<C-/>', 'gc', { remap = true})
+vim.keymap.set('n', '<M-h>', '<C-W>h')
+vim.keymap.set('n', '<M-j>', '<C-W>j')
+vim.keymap.set('n', '<M-k>', '<C-W>k')
+vim.keymap.set('n', '<M-l>', '<C-W>l')
+
 
 if vim.fn.exists('g:vscode') == 1 then return end
 
@@ -346,9 +357,9 @@ table.insert(after, function()
 	lspconfig.cssls.setup{
 		cmd = { 'vscode-css-languageserver', '--stdio' },
 	}
-	lspconfig.jsonls.setup{
-		cmd = { 'vscode-json-languageserver', '--stdio' },
-	}
+	-- lspconfig.jsonls.setup{
+	-- 	cmd = { 'vscode-json-languageserver', '--stdio' },
+	-- }
 	lspconfig.tsserver.setup{}
 	lspconfig.pyright.setup{}
 	--lspconfig.jedi_language_server.setup{}

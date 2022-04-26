@@ -26,6 +26,7 @@
 	mt = mergetool
 	dt = difftool
 	wt = worktree
+	cp = cherry-pick
 [init]
 	defaultBranch = master
 [filter "lfs"]
