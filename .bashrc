@@ -3,15 +3,18 @@
 
 unset PROMPT_COMMAND
 shopt -s globstar histappend lithist
-tabs -2 2>/dev/null
+# tabs -2 2>/dev/null
 HISTCONTROL=ignoreboth
 HISTSIZE=10000
 HISTFILESIZE=10000
 
+source /usr/share/bash-complete-alias/complete_alias 2>/dev/null &&
+	complete -F _complete_alias config ytdl ytmdl userctl
+
 source /usr/share/git/git-prompt.sh 2>/dev/null &&
-  GIT_PS1_COMPRESSSPARSESTATE=1 GIT_PS1_SHOWSTASHSTATE=1 \
-  GIT_PS1_SHOWUPSTREAM=auto GIT_PS1_STATESEPARATOR=
-SHORTPS1=$'\[\e]0;\u@\h:\W\a\]$(x=$?;((\j))&&echo -E \'\[\e[1;35m\]\j\';exit $((x==0?32:31)))\[\e[1;$?m\]\$\[\e[0m\] '
+	GIT_PS1_COMPRESSSPARSESTATE=1 GIT_PS1_SHOWSTASHSTATE=1 \
+	GIT_PS1_SHOWUPSTREAM=auto GIT_PS1_STATESEPARATOR=
+SHORTPS1=$'\[\e]133;A\e\\\e]0;\u@\h:\W\a\]$(x=$?;((\j))&&echo -E \'\[\e[1;35m\]\j\';exit $((x==0?32:31)))\[\e[1;$?m\]\$\[\e[0m\] '
 [ -n "$SWAYSOCK" ] && SHORTPS1=$'\[\e]7;file://$PWD\a\]'"$SHORTPS1"
 longps1() {
 	PS1=$'\[\e[1;36m\][\[\e[32m\]\u\[\e[36m\]@\[\e[33m\]\h\[\e[36m\]:\[\e[34m\]\W'
@@ -42,6 +45,7 @@ alias config="git --git-dir=$HOME/.cfg --work-tree=$HOME"
 alias gpgfix='gpg-connect-agent updatestartuptty /bye'
 alias tmus="tmux new-session -As cmus 'tmux set status off && tmux set set-titles-string \\#{pane_title} && cmus'"
 alias ytdl="yt-dlp --ignore-errors --output '%(title)s.%(ext)s' --no-mtime"
+alias ytmdl="yt-dlp --ignore-errors --output '%(track_number)02d. %(track)s.%(ext)s' --no-mtime --embed-metadata"
 vmv() { nvim +"Renamer $1"; }
 
 export CPPFLAGS CFLAGS CXXFLAGS LDFLAGS CC CXX
@@ -56,8 +60,7 @@ envrel() {
 	LDFLAGS='-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now'
 }
 
-#eval `dircolors -b | sed 's/00;3/01;9/g'`
-eval `dircolors -b`
+eval `dircolors -b | sed 's/40;//g'`
 alias ls='ls -F --color=auto'
 alias grep='grep --color=auto'
 alias egrep='egrep --color=auto'
@@ -72,6 +75,7 @@ alias pass='PASSWORD_STORE_DIR=~/.local/share/pass pass'
 alias tb='nc termbin.com 9999'
 alias ix="curl -F 'f:1=<-' ix.io"
 alias bp="curl -F 'raw=<-' https://bpa.st/curl"
+alias imgur="{ curl -sH 'Authorization: Client-ID 0bffa5b4ac8383c' -F 'image=<-' https://api.imgur.com/3/image | jq -r .data.link; }"
 alias man=$'LESS_TERMCAP_md="\e[01;91m" LESS_TERMCAP_me="\e[0m" LESS_TERMCAP_us="\e[01;32m" LESS_TERMCAP_ue="\e[0m" man'
 alias sudo='sudo '
 # alias armexec="bwrap --unshare-ipc --unshare-pid --unshare-uts --unshare-cgroup --hostname arm-chroot \
@@ -88,9 +92,12 @@ alias aarch64exec='bwrap --unshare-ipc --unshare-pid --unshare-uts --unshare-cgr
 alias sshirssi='ssh minerva -t tmux -f ~/.irssi/tmux.conf new -An irssi irssi'
 alias pacdiff='DIFFPROG=nvim\ -d pacdiff'
 alias xfreerdp='xfreerdp /floatbar:sticky:off,show:always /workarea -decorations /drive:share,"$HOME/Downloads"'
-alias wlfreerdp='swaymsg -t get_tree | jq -r '\''recurse(.nodes[])|select(.focused).rect|"\(.width)x\(.height)"'\'' | xargs -I{} wlfreerdp /size:{}'
-alias sway='TERMINAL="foot -dwarning" QT_QPA_PLATFORMTHEME=kde XDG_CURRENT_DESKTOP=sway systemd-cat sway'
+alias wlfreerdp='wlfreerdp /size:"$(swaymsg -t get_tree | jq -r '\''recurse(.nodes[])|select(.focused).rect|"\(.width)x\(.height)"'\'')"'
 alias ytmmix='mpv --vid=no --ytdl-raw-options=cookies-from-browser=chromium+gnomekeyring ytdl://RDTMAK5uy_kset8DisdE7LSD4TNjEVvrKRTmG7a56sY'
+alias texdoc='LC_ALL="$LANG" texdoc'
+alias userctl='systemctl --user'
+
+[ "x$XDG_SESSION_TYPE" = xtty ] && alias sway='exec systemd-cat systemd-run --user --scope -u sway-session -E TERMINAL="foot -dwarning" -E QT_QPA_PLATFORMTHEME=kde -E XDG_CURRENT_DESKTOP=sway -E ASAN_OPTIONS="disable_coredump=0:unmap_shadow_on_exit=1:abort_on_error=1:detect_leaks=0" sway'
 
 camurl='https://10.42.0.200:8080/video'
 camstart() {

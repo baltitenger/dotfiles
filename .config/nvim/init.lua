@@ -1,4 +1,5 @@
 local datapath = vim.fn.stdpath('data')
+local autocmd = vim.api.nvim_create_autocmd
 
 if vim.env.TERM ~= 'linux' then
 	vim.opt.termguicolors = true
@@ -26,18 +27,28 @@ vim.opt.tabstop = 2
 vim.opt.shiftwidth = 0
 vim.opt.smartindent = true
 vim.opt.foldlevelstart = 99
-vim.opt.foldmethod = 'syntax'
+vim.opt.foldmethod = 'marker'
 vim.opt.diffopt = { 'filler', 'iwhite', 'closeoff', 'internal', 'indent-heuristic' }
 vim.opt.wildmode = { 'longest:full', 'full' }
 vim.opt.inccommand = 'nosplit'
 vim.opt.clipboard = 'unnamed'
 
+autocmd("FileType", { pattern = "tex", callback = function()
+	vim.opt_local.spell = true
+	local tmp = vim.g.easy_align_delimiters
+	tmp['\\'] = {
+		pattern         = [[\\\\]],
+		delimiter_align = 'center',
+	}
+	vim.g.easy_align_delimiters = tmp
+end})
+autocmd("FileType", { pattern = "markdown", command = [[
+	setlocal spell tw=80
+	compiler markdown
+]]})
+autocmd("FileType", { pattern = "cs", command = [[compiler dotnet]]})
+
 vim.cmd[==[
-au FileType tex setlocal spell
-au FileType markdown setlocal spell tw=80
-au FileType markdown compiler markdown
-"au FileType python setlocal foldmethod=indent
-au FileType cs compiler dotnet
 au BufWritePre /tmp/* setlocal noundofile
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line('$') && &ft !~# 'commit' | exe 'normal! g`"' | endif
 au BufNewFile,BufRead *.zig setf zig
@@ -195,7 +206,7 @@ vim.keymap.set('n', 'Y', 'y$')
 vim.keymap.set('n', 'gb', GitBlame)
 -- vim.keymap.set('v', '<Leader>w', VisualWc)
 vim.keymap.set('v', '<Leader>w', '<Cmd>lua VisualWc()<CR>') -- should convert to an operator probably
-vim.keymap.set('i', '<C-H>', '<C-W>')
+vim.keymap.set('i', '<C-BS>', '<C-W>')
 vim.keymap.set('n', 'gcc', '<Cmd>set opfunc=v:lua.ToggleComment<CR>g@l')
 vim.keymap.set('n', 'gc',  '<Cmd>set opfunc=v:lua.ToggleComment<CR>g@')
 vim.keymap.set('v', 'gc',  '<Cmd>set opfunc=v:lua.ToggleComment<CR>g@')
@@ -205,6 +216,7 @@ vim.keymap.set('n', '<M-h>', '<C-W>h')
 vim.keymap.set('n', '<M-j>', '<C-W>j')
 vim.keymap.set('n', '<M-k>', '<C-W>k')
 vim.keymap.set('n', '<M-l>', '<C-W>l')
+vim.keymap.set('n', 'É', ':')
 
 
 if vim.fn.exists('g:vscode') == 1 then return end
@@ -252,7 +264,6 @@ vim.g.easy_align_delimiters = {
 		ignore_groups   = {'String', 'Comment'},
 	},
 }
-vim.cmd[[autocmd FileType markdown imap <buffer> <Bar> <Bar><Esc>m`gaip*<Bar>``A]]
 
 Plug 'bogado/file-line'
 
@@ -281,7 +292,7 @@ table.insert(after, function()
 		vim.api.nvim_buf_clear_namespace(bufnr, test_ns, 0, -1)
 		local real_diags = {}
 		for _, diag in pairs(result.diagnostics) do
-			if diag.severity == vim.lsp.protocol.DiagnosticSeverity.Hint
+			if diag.severity == vim.lsp.protocol.DiagnosticSeverity.Hint and diag.tags
 					and vim.tbl_contains(diag.tags, vim.lsp.protocol.DiagnosticTag.Unnecessary) then
 				pcall(vim.api.nvim_buf_set_extmark, bufnr, test_ns,
 						diag.range.start.line, diag.range.start.character, {
@@ -435,7 +446,7 @@ table.insert(after, function()
 			enable = true,
 		},
 		indent = {
-			enable = false,
+			enable = true,
 			disable = { 'python' },
 		},
 	}

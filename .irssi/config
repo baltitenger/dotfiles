@@ -10,7 +10,7 @@ servers = (
     use_tls = "yes";
     tls_verify = "yes";
     autoconnect = "yes";
-		ssl_cert = "~/.irssi/irssi.pem";
+    ssl_cert = "~/.irssi/irssi.pem";
   },
   # { address = "irc.gamesurge.net"; chatnet = "GameSurge"; port = "6667"; },
   # { address = "eu.irc6.net";       chatnet = "IRCnet";    port = "6667"; use_tls = "yes"; },
@@ -24,7 +24,7 @@ servers = (
     use_tls = "yes";
     tls_verify = "yes";
     autoconnect = "yes";
-		ssl_cert = "~/.irssi/irssi.pem";
+    ssl_cert = "~/.irssi/irssi.pem";
   },
   # { address = "irc.quakenet.org";  chatnet = "QuakeNet";  port = "6667"; },
   # { address = "irc.rizon.net";     chatnet = "Rizon";     port = "6697"; use_tls = "yes"; tls_verify = "yes"; },
@@ -296,8 +296,14 @@ keyboard = (
   { key = "^H"; id = "delete_to_previous_space"; },
   { key = "up"; id = "command"; data = "scrollback goto -1"; },
   { key = "down"; id = "command"; data = "scrollback goto +1"; },
-  { key = "meta--"; id = "command"; data = "window last"; }
-  { key = "meta-`"; id = "command"; data = "window last"; }
+  { key = "meta--"; id = "command"; data = "window last"; },
+  { key = "meta-`"; id = "command"; data = "window last"; },
+  { key = "meta-k"; id = "upper_window"; },
+  { key = "meta-j"; id = "lower_window"; },
+  { key = "meta-h"; id = "left_window"; },
+  { key = "meta-l"; id = "right_window"; }
+  { key = "meta2-9;5u"; id = "next_window"; data = ""; },
+  { key = "meta2-9;6u"; id = "previous_window"; data = ""; },
 );
 logs = { };
 hilights = (

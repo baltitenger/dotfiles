@@ -1,6 +1,6 @@
-timeout 300 'swaymsg -q "output * dpms off"' resume 'swaymsg -q "output * dpms on"'
+timeout 300 'swaymsg -q "output * power off"' resume 'swaymsg -q "output * power on"'
 timeout 305 'swaylock'
-timeout 30 'pgrep -x swaylock && swaymsg -q "output * dpms off"' resume 'pgrep -x swaylock && swaymsg -q "output * dpms on"'
+timeout 30 'pgrep -x swaylock && swaymsg -q "output * power off"' resume 'pgrep -x swaylock && swaymsg -q "output * power on"'
 before-sleep 'playerctl pause'
 before-sleep 'swaylock'
 lock 'swaylock'

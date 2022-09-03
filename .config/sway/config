@@ -7,35 +7,16 @@ set $left h
 set $down j
 set $up k
 set $right l
-# Your preferred terminal emulator
-set $term "$TERMINAL"
-# Your preferred application launcher
-# Note: pass the final command to swaymsg so that the resulting window can be opened
-# on the original workspace that the command was run on.
-# set $menu dmenu_path | dmenu | xargs swaymsg exec --
-
-set $menusock "$XDG_RUNTIME_DIR/j4-dmenu-desktop.sock"
-exec j4-dmenu-desktop --dmenu='bemenu -i --fn "Noto Sans 12" -H 30' --term=$term --wrapper='swaymsg -q exec' --wait-on=$menusock
-set $menu echo >$menusock
-
-set $laptop 'Chimei Innolux Corporation 0x14B1 0x00000000'
 
 ### Output configuration
-#
-# Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-# output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
-#
-# Example configuration:
-#   output HDMI-A-1 resolution 1920x1080 position 1920,0
-# You can get the names of your outputs by running: swaymsg -t get_outputs
-
+set $laptop eDP-1
 bindswitch --reload --locked lid:on  output $laptop disable
 bindswitch --reload --locked lid:off output $laptop enable
 
-# exec 'shuf -er  ~/Pictures/backgrounds/apod/* | while read bg; do swaymsg -q "output * bg ${bg@Q} fill" && sleep 15m; done'
+workspace number 1
+
+# oguri & switcher started by systemd
 swaybg_command -
-exec oguri
-exec 'shuf -er  ~/Pictures/backgrounds/apod/* | while read bg; do ogurictl output "*" --image "$bg" && sleep 15m; done'
 
 ### Appearence
 
@@ -44,12 +25,8 @@ font 'Noto Sans 11'
 default_border none
 gaps inner 10
 smart_gaps on
-
-exec gammastep
-
-### Idle configuration
-
-exec swayidle -w
+workspace_layout tabbed
+hide_edge_borders --i3 none
 
 ### Input configuration
 # You can get the names of your inputs by running: swaymsg -t get_inputs
@@ -72,13 +49,13 @@ input type:touchpad {
 # Basics:
 #
 	# Start a terminal
-	bindsym $mod+Return exec $term
+	bindsym $mod+Return exec "$TERMINAL"
 
 	# Kill focused window
 	bindsym $mod+Shift+q kill
 
-	# Start your launcher
-	bindsym $mod+d exec $menu
+	# Start your launcher (managed by systemd)
+	bindsym $mod+d exec echo >"$XDG_RUNTIME_DIR/j4-dmenu-desktop.sock"
 
 	bindsym $mod+c exec bemenu-openfile
 
@@ -92,48 +69,49 @@ input type:touchpad {
 	# Reload the configuration file
 	bindsym $mod+Shift+c reload
 
-	# Exit sway (logs you out of your Wayland session)
-	bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
-
 	bindsym          $mod+S      sticky toggle
 	bindsym --locked $mod+Ctrl+S exec systemctl suspend
 	bindsym          $mod+Ctrl+L exec swaylock
 	bindsym --locked Ctrl+Alt+K  input type:keyboard xkb_switch_layout next
 
+	# type zero width space
+	bindsym          $mod+alt+space  exec wtype ​
+
 	bindsym Print       exec wl-sshot rect
 	bindsym Shift+Print exec wl-sshot active
 	bindsym Ctrl+Print  exec wl-sshot full
 
-	bindsym $mod+M exec mpv "ytdl://$(wl-paste -n)"
+	bindsym $mod+Ctrl+m exec mpv "ytdl://$(wl-paste -n)"
 
+	bindsym $mod+o       output * power on
+	bindsym $mod+Shift+o output * power off
+
+	bindsym $mod+Alt+i workspace number 2, exec chromium, workspace number 3, exec element-desktop, workspace number 1
+
+	# disable menubar toggle in electron apps
+	bindsym      Alt_L nop
+	bindsym Ctrl+Alt_L nop
 #
 # Moving around:
 #
 	# Move your focus around
-	bindsym $mod+$left focus left
-	bindsym $mod+$down focus down
-	bindsym $mod+$up focus up
+	bindsym $mod+$left  focus left
+	bindsym $mod+$down  focus down
+	bindsym $mod+$up    focus up
 	bindsym $mod+$right focus right
-	# Or use $mod+[up|down|left|right]
-	# bindsym $mod+Left focus left
-	# bindsym $mod+Down focus down
-	# bindsym $mod+Up focus up
-	# bindsym $mod+Right focus right
+	bindsym Alt+Tab       focus next
+	bindsym Alt+Shift+Tab focus prev
 
 	# Move the focused window with the same, but add Shift
-	bindsym $mod+Shift+$left move left
-	bindsym $mod+Shift+$down move down
-	bindsym $mod+Shift+$up move up
-	bindsym $mod+Shift+$right move right
-	# Ditto, with arrow keys
-	# bindsym $mod+Shift+Left move left
-	# bindsym $mod+Shift+Down move down
-	# bindsym $mod+Shift+Up move up
-	# bindsym $mod+Shift+Right move right
+	bindsym $mod+Shift+$left  move left  20 px
+	bindsym $mod+Shift+$down  move down  20 px
+	bindsym $mod+Shift+$up    move up    20 px
+	bindsym $mod+Shift+$right move right 20 px
 #
 # Workspaces:
 #
 	# Switch to workspace
+	bindsym $mod+Grave workspace back_and_forth
 	bindsym $mod+1 workspace number 1
 	bindsym $mod+2 workspace number 2
 	bindsym $mod+3 workspace number 3
@@ -147,6 +125,7 @@ input type:touchpad {
 	bindsym $mod+Tab       workspace next_on_output
 	bindsym $mod+Shift+Tab workspace prev_on_output
 	# Move focused container to workspace
+	bindsym $mod+Shift+Grave move container to workspace back_and_forth
 	bindsym $mod+Shift+1 move container to workspace number 1
 	bindsym $mod+Shift+2 move container to workspace number 2
 	bindsym $mod+Shift+3 move container to workspace number 3
@@ -184,6 +163,11 @@ input type:touchpad {
 
 	# Move focus to the parent container
 	bindsym $mod+a focus parent
+
+	# Show / hide the bar
+	bindsym $mod+z       bar 1 mode dock
+	bindsym $mod+Shift+z bar 1 mode invisible
+	bindsym $mod+Ctrl+z  bar 1 mode hide
 #
 # Scratchpad:
 #
@@ -199,27 +183,27 @@ input type:touchpad {
 #
 # Resizing containers:
 #
+bindsym $mod+r mode "resize"
 mode "resize" {
-	# left will shrink the containers width
-	# right will grow the containers width
-	# up will shrink the containers height
-	# down will grow the containers height
-	bindsym $left resize shrink width 10px
-	bindsym $down resize grow height 10px
-	bindsym $up resize shrink height 10px
-	bindsym $right resize grow width 10px
-
-	# Ditto, with arrow keys
-	# bindsym Left resize shrink width 10px
-	# bindsym Down resize grow height 10px
-	# bindsym Up resize shrink height 10px
-	# bindsym Right resize grow width 10px
+	bindsym $left  resize shrink width  10px
+	bindsym $up    resize shrink height 10px
+	bindsym $down  resize grow   height 10px
+	bindsym $right resize grow   width  10px
 
 	# Return to default mode
 	bindsym Return mode "default"
 	bindsym Escape mode "default"
 }
-bindsym $mod+r mode "resize"
+
+set $exit exec 'systemctl --user stop graphical-session.target; swaymsg -q exit'
+set $exitmode 'Exit sway?'
+bindsym $mod+Shift+e mode $exitmode
+mode $exitmode {
+	bindsym $mod+Shift+e $exit
+	bindsym Return $exit
+	bindsym Escape mode "default"
+}
+
 
 #
 # fn keys
@@ -228,14 +212,14 @@ bindsym $mod+r mode "resize"
 	bindsym --locked XF86AudioLowerVolume   exec pactl set-sink-volume @DEFAULT_SINK@ -5%
 	bindsym --locked XF86AudioRaiseVolume   exec pactl set-sink-volume @DEFAULT_SINK@ +5%
 	bindsym          XF86AudioMicMute       exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
-	bindsym          $mod+Ctrl+M            exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
+	bindsym          $mod+m                 exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
 	bindsym --locked XF86AudioPlay          exec playerctl play-pause
 	bindsym --locked $mod+Down              exec playerctl play-pause
 	bindsym --locked XF86AudioPause         exec playerctl pause
-	bindsym          XF86AudioNext          exec playerctl next
-	bindsym          $mod+Right             exec playerctl next
-	bindsym          XF86AudioPrev          exec playerctl previous
-	bindsym          $mod+Left              exec playerctl previous
+	bindsym --locked XF86AudioNext          exec playerctl next
+	bindsym --locked $mod+Right             exec playerctl next
+	bindsym --locked XF86AudioPrev          exec playerctl previous
+	bindsym --locked $mod+Left              exec playerctl previous
 	bindsym --locked XF86MonBrightnessDown  exec brightnessctl -n -e set 5%-
 	bindsym --locked XF86MonBrightnessUp    exec brightnessctl -n -e set 5%+
 	# bindsym XF86Display
@@ -245,15 +229,13 @@ bindsym $mod+r mode "resize"
 	# bindsym XF86LaunchA
 	# bindsym XF86Explorer
 
+
 #
 # Misc
 #
-exec systemctl --user import-environment QT_QPA_PLATFORMTHEME
-exec dbus-update-activation-environment --systemd QT_QPA_PLATFORMTHEME
-
-exec nm-applet --indicator
-exec blueman-applet
-exec playerctld daemon
+exec dbus-update-activation-environment --systemd \
+	DISPLAY WAYLAND_DISPLAY SWAYSOCK TERMINAL QT_QPA_PLATFORMTHEME XDG_CURRENT_DESKTOP \
+	&& systemctl --user start sway-session.target
 
 #
 # Window specific stuff
@@ -277,24 +259,7 @@ for_window [floating app_id="" title=".* is sharing your screen\."] {
 	move absolute position -100000 -100000
 }
 
-#
-# Status Bar:
-#
-# Read `man 5 sway-bar` for more information about this section.
 bar {
-	swaybar_command waybar
-
-	position top
-
-	# # When the status_command prints a new line to stdout, swaybar updates.
-	# # The default just shows the current date and time.
-	# status_command while date +'%Y-%m-%d %I:%M:%S %p'; do sleep 1; done
-
-	# colors {
-	# 	statusline #ffffff
-	# 	background #323232
-	# 	inactive_workspace #32323200 #32323200 #5c5c5c
-	# }
+	id 1
+	swaybar_command -
 }
-
-include /etc/sway/config.d/*
