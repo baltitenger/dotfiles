@@ -115,17 +115,12 @@ channels = (
   { name = "#c"; chatnet = "LiberaChat"; autojoin = "yes"; },
   { name = "#c++-general"; chatnet = "LiberaChat"; autojoin = "yes"; },
   { name = "#c++"; chatnet = "LiberaChat"; autojoin = "yes"; },
-  # { name = "#freenode"; chatnet = "Freenode"; autojoin = "no"; },
-  # { name = "#irssi"; chatnet = "Freenode"; autojoin = "no"; },
-  { name = "#archlinux"; chatnet = "Freenode"; autojoin = "no"; },
-  { name = "##c"; chatnet = "Freenode"; autojoin = "no"; },
-  { name = "##c++-general"; chatnet = "Freenode"; autojoin = "no"; },
-  { name = "##c++"; chatnet = "Freenode"; autojoin = "no"; },
-  # { name = "##posix"; chatnet = "Freenode"; autojoin = "yes"; },
   { name = "#python"; chatnet = "LiberaChat"; autojoin = "yes"; },
-  { name = "#neovim"; chatnet = "Freenode"; autojoin = "no"; },
   { name = "#neovim"; chatnet = "LiberaChat"; autojoin = "yes"; },
-  { name = "#llvm"; chatnet = "OFTC"; autojoin = "yes"; }
+  { name = "#sway"; chatnet = "LiberaChat"; autojoin = "yes"; },
+  { name = "#sway-devel"; chatnet = "LiberaChat"; autojoin = "yes"; },
+  { name = "#foot"; chatnet = "LiberaChat"; autojoin = "yes"; },
+  { name = "#llvm"; chatnet = "OFTC"; autojoin = "yes"; },
 );
 
 aliases = {
@@ -289,6 +284,7 @@ settings = {
     term_charset = "utf-8";
     emphasis_italics = "no";
   };
+  "perl/core/scripts" = { neat_colors = "rRX5EygGcCBX4NMm"; };
 };
 
 keyboard = (
@@ -301,7 +297,7 @@ keyboard = (
   { key = "meta-k"; id = "upper_window"; },
   { key = "meta-j"; id = "lower_window"; },
   { key = "meta-h"; id = "left_window"; },
-  { key = "meta-l"; id = "right_window"; }
+  { key = "meta-l"; id = "right_window"; },
   { key = "meta2-9;5u"; id = "next_window"; data = ""; },
   { key = "meta2-9;6u"; id = "previous_window"; data = ""; },
 );
