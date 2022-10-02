@@ -14,7 +14,7 @@ source /usr/share/bash-complete-alias/complete_alias 2>/dev/null &&
 source /usr/share/git/git-prompt.sh 2>/dev/null &&
 	GIT_PS1_COMPRESSSPARSESTATE=1 GIT_PS1_SHOWSTASHSTATE=1 \
 	GIT_PS1_SHOWUPSTREAM=auto GIT_PS1_STATESEPARATOR=
-SHORTPS1=$'\[\e]133;A\e\\\e]0;\u@\h:\W\a\]$(x=$?;((\j))&&echo -E \'\[\e[1;35m\]\j\';exit $((x==0?32:31)))\[\e[1;$?m\]\$\[\e[0m\] '
+SHORTPS1=$'\[\e]133;A\e\\\e]2;\u@\h:\W\a\]$(x=$?;((\j))&&echo -E \'\[\e[1;35m\]\j\';exit $((x==0?32:31)))\[\e[1;$?m\]\$\[\e[0m\] '
 [ -n "$SWAYSOCK" ] && SHORTPS1=$'\[\e]7;file://$PWD\a\]'"$SHORTPS1"
 longps1() {
 	PS1=$'\[\e[1;36m\][\[\e[32m\]\u\[\e[36m\]@\[\e[33m\]\h\[\e[36m\]:\[\e[34m\]\W'
@@ -55,9 +55,13 @@ envdbg() {
 	LDFLAGS='-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now'
 }
 envrel() {
-	CFLAGS='-O2 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra'
-	CXXFLAGS='-O2 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra -Wp,-D_GLIBCXX_ASSERTIONS -std=c++20'
-	LDFLAGS='-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now'
+	CFLAGS='-O2 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra -g -flto=auto'
+	CXXFLAGS='-O2 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra -g -Wp,-D_GLIBCXX_ASSERTIONS -std=c++20 -flto=auto'
+	LDFLAGS='-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now -flto=auto'
+}
+envik() {
+	CFLAGS='-O2 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra -Wpedantic -Wvla -Werror=vla -flto=auto -g'
+	LDFLAGS='-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now -flto=auto'
 }
 
 eval `dircolors -b | sed 's/40;//g'`
@@ -78,6 +82,7 @@ alias bp="curl -F 'raw=<-' https://bpa.st/curl"
 alias imgur="{ curl -sH 'Authorization: Client-ID 0bffa5b4ac8383c' -F 'image=<-' https://api.imgur.com/3/image | jq -r .data.link; }"
 alias man=$'LESS_TERMCAP_md="\e[01;91m" LESS_TERMCAP_me="\e[0m" LESS_TERMCAP_us="\e[01;32m" LESS_TERMCAP_ue="\e[0m" man'
 alias sudo='sudo '
+alias dotnet='DOTNET_CLI_TELEMETRY_OPTOUT=1 dotnet'
 # alias armexec="bwrap --unshare-ipc --unshare-pid --unshare-uts --unshare-cgroup --hostname arm-chroot \
 # --bind ~/stuff/arm-chroot / --bind ~ ~ --proc /proc --dev /dev --tmpfs /tmp --tmpfs /run \
 # --ro-bind /usr/{,host/}bin --ro-bind /usr/{,host/}include --ro-bind /usr/{,host/}lib --ro-bind /usr/{,host/}share \
@@ -97,7 +102,8 @@ alias ytmmix='mpv --vid=no --ytdl-raw-options=cookies-from-browser=chromium+gnom
 alias texdoc='LC_ALL="$LANG" texdoc'
 alias userctl='systemctl --user'
 
-[ "x$XDG_SESSION_TYPE" = xtty ] && alias sway='exec systemd-cat systemd-run --user --scope -u sway-session -E TERMINAL="foot -dwarning" -E QT_QPA_PLATFORMTHEME=kde -E XDG_CURRENT_DESKTOP=sway -E ASAN_OPTIONS="disable_coredump=0:unmap_shadow_on_exit=1:abort_on_error=1:detect_leaks=0" sway'
+# [ "$XDG_SESSION_TYPE" = tty ] && alias sway='exec systemd-cat systemd-run --user --scope -u sway-session -E TERMINAL="foot -dwarning" -E QT_QPA_PLATFORMTHEME=kde -E XDG_CURRENT_DESKTOP=sway -E ASAN_OPTIONS="disable_coredump=0:unmap_shadow_on_exit=1:abort_on_error=1:detect_leaks=0" -E UBSAN_OPTIONS=print_stacktrace=1 sway'
+[ "$XDG_SESSION_TYPE" = tty ] && alias sway='systemctl --user reset-failed; exec systemd-cat systemd-run --user --scope -u sway-session -E TERMINAL="foot -dwarning" -E QT_QPA_PLATFORMTHEME=kde -E XDG_CURRENT_DESKTOP=sway sway'
 
 camurl='https://10.42.0.200:8080/video'
 camstart() {

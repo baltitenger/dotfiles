@@ -33,7 +33,7 @@ vim.opt.wildmode = { 'longest:full', 'full' }
 vim.opt.inccommand = 'nosplit'
 vim.opt.clipboard = 'unnamed'
 
-autocmd("FileType", { pattern = "tex", callback = function()
+autocmd('FileType', { pattern = 'tex', callback = function()
 	vim.opt_local.spell = true
 	local tmp = vim.g.easy_align_delimiters
 	tmp['\\'] = {
@@ -42,11 +42,12 @@ autocmd("FileType", { pattern = "tex", callback = function()
 	}
 	vim.g.easy_align_delimiters = tmp
 end})
-autocmd("FileType", { pattern = "markdown", command = [[
+autocmd('FileType', { pattern = 'markdown', command = [[
 	setlocal spell tw=80
 	compiler markdown
 ]]})
-autocmd("FileType", { pattern = "cs", command = [[compiler dotnet]]})
+autocmd('FileType', { pattern = 'cs', command = [[compiler dotnet]]})
+autocmd('FileType', { pattern = 'haskell', command = [[set ts=8 sw=2 et]]})
 
 vim.cmd[==[
 au BufWritePre /tmp/* setlocal noundofile
@@ -72,6 +73,8 @@ hi NonText      guifg=DarkCyan
 hi manUnderline guifg=Green
 hi manBold      gui=bold
 hi link texOnlyMath NONE
+hi LspSignatureActiveParameter guibg=DarkRed
+hi def Dim guifg=grey
 ]==]
 
 local floatBorder = {
@@ -92,6 +95,10 @@ vim.g.tex_fold_enabled = 1
 vim.g.tex_flavor = 'latex'
 vim.g.html_indent_script1 = 'inc'
 vim.g.html_indent_style1 = 'inc'
+
+local function executable(cmd)
+	return vim.fn.executable(cmd) == 1
+end
 
 function SudoWrite(sure)
 	if not sure then
@@ -161,6 +168,7 @@ comment_map = {
 	i3config   = '#',
 	bat        = 'REM',
 	lua        = '--',
+	haskell    = '--',
 	mail       = '>',
 	tex        = '%',
 	vim        = '"',
@@ -201,6 +209,53 @@ function ToggleComment(type)
 	vim.api.nvim_buf_set_lines(0, first, last, true, lines);
 end
 
+function ToggleBraces()
+	local l = vim.api.nvim_win_get_cursor(0)[1] - 2
+	local lines = vim.api.nvim_buf_get_lines(0, l, l+3, true)
+	print(vim.inspect(lines))
+	local prev, succ1 = string.gsub(lines[1], '%s*{$', '')
+	local succ2 = string.match(lines[3], '^%s*}$')
+	if succ1 == 1 and succ2 then
+		lines[1] = prev
+		table.remove(lines)
+	else
+		lines[1] = lines[1] .. ' {'
+		table.insert(lines, #lines, string.match(lines[1], '^%s*') .. '}')
+	end
+	vim.api.nvim_buf_set_lines(0, l, l+3, true, lines)
+end
+
+-- function osccopy(sel)
+-- 	return function(lines, _)
+-- 		local job = vim.fn.jobstart({'base64', '-w0'}, {
+-- 			stdout_buffered = true,
+-- 			on_stdout = function(_, data, _)
+-- 				io.stdout:write('\027]52;'..sel..';'..data[1]..'\027\\')
+-- 			end,
+-- 		})
+-- 		vim.fn.chansend(job, lines)
+-- 		vim.fn.chanclose(job, 'stdin')
+-- 	end
+-- end
+
+-- function oscpaste(sel)
+-- 	return function()
+-- 		io.stdout:write('\027]52;'..sel..';?\027\\')
+-- 		return { { '' }, 'c' }
+-- 	end
+-- end
+
+-- vim.cmd 'runtime autoload/provider/clipboard.vim'
+-- if executable('base64') and vim.g.loaded_clipboard_provider ~= 2 then
+-- 	vim.g.clipboard = {
+-- 		name = 'OSC-52',
+-- 		copy  = { ['*'] = osccopy  's', ['+'] = osccopy  'c' },
+-- 		paste = { ['*'] = oscpaste 's', ['+'] = oscpaste 'c' },
+-- 	}
+-- 	vim.g.loaded_clipboard_provider = nil
+-- 	vim.cmd 'runtime autoload/provider/clipboard.vim'
+-- end
+
 vim.keymap.set('n', '<Leader>/', '<Cmd>noh<CR>')
 vim.keymap.set('n', 'Y', 'y$')
 vim.keymap.set('n', 'gb', GitBlame)
@@ -217,14 +272,11 @@ vim.keymap.set('n', '<M-j>', '<C-W>j')
 vim.keymap.set('n', '<M-k>', '<C-W>k')
 vim.keymap.set('n', '<M-l>', '<C-W>l')
 vim.keymap.set('n', 'É', ':')
+vim.keymap.set('n', 'gs', ToggleBraces)
 
 
 if vim.fn.exists('g:vscode') == 1 then return end
 
-
-local function executable(cmd)
-	return vim.fn.executable(cmd) == 1
-end
 
 if executable('curl') and vim.fn.filereadable(datapath..'/site/autoload/plug.vim') == 0 then
 	print 'Downloading vim-plug...'
@@ -271,16 +323,10 @@ Plug 'bogado/file-line'
 
 -- vim.lsp.set_log_level('trace');
 
-local test_ns = vim.api.nvim_create_namespace('test')
-vim.cmd('hi! def Dim guifg=grey')
-
 Plug 'neovim/nvim-lspconfig'
 table.insert(after, function()
 	local lspconfig = require 'lspconfig'
-	lspconfig.util.default_config.capabilities
-		= vim.lsp.protocol.make_client_capabilities()
-	lspconfig.util.default_config.capabilities
-		.textDocument.completion.completionItem.snippetSupport = true
+	local test_ns = vim.api.nvim_create_namespace('test')
 	vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, {
 		border = floatBorder,
 	})
@@ -307,50 +353,35 @@ table.insert(after, function()
 		result.diagnostics = real_diags
 		vim.lsp.diagnostic.on_publish_diagnostics(_, result, ctx, config)
 	end
+	lspconfig.util.default_config.capabilities
+		.textDocument.completion.completionItem.snippetSupport = true
 	lspconfig.util.default_config.on_attach = function(client, bufnr)
-		local function buf_set_keymap(mode, lhs, rhs)
-			vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, { noremap = true, silent = true })
-		end
-		local function buf_set_option(...)
-			vim.api.nvim_buf_set_option(bufnr, ...)
-		end
-
-		buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
-
 		-- Mappings.
-		buf_set_keymap('n', 'gD',    '<Cmd>lua vim.lsp.buf.declaration()<CR>')
-		buf_set_keymap('n', 'gd',    '<Cmd>lua vim.lsp.buf.definition()<CR>')
-		buf_set_keymap('n', 'K',     '<Cmd>lua vim.lsp.buf.hover()<CR>')
-		buf_set_keymap('n', 'gi',    '<Cmd>lua vim.lsp.buf.implementation()<CR>')
-		buf_set_keymap('n', '<C-k>', '<Cmd>lua vim.lsp.buf.signature_help()<CR>')
-		buf_set_keymap('n', ' wa',   '<Cmd>lua vim.lsp.buf.add_workspace_folder()<CR>')
-		buf_set_keymap('n', ' wr',   '<Cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>')
-		buf_set_keymap('n', ' wl',   '<Cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>')
-		buf_set_keymap('n', ' D',    '<Cmd>lua vim.lsp.buf.type_definition()<CR>')
-		buf_set_keymap('n', ' r',    '<Cmd>lua vim.lsp.buf.rename()<CR>')
-		buf_set_keymap('n', 'gr',    '<Cmd>lua vim.lsp.buf.references()<CR>')
-		buf_set_keymap('n', ' e',    '<Cmd>lua vim.diagnostic.open_float()<CR>')
-		buf_set_keymap('n', '[d',    '<Cmd>lua vim.diagnostic.goto_prev()<CR>')
-		buf_set_keymap('n', ']d',    '<Cmd>lua vim.diagnostic.goto_next()<CR>')
-		buf_set_keymap('n', ' q',    '<Cmd>lua vim.diagnostic.setloclist()<CR>')
-		buf_set_keymap('n', ' a',    '<Cmd>lua vim.lsp.buf.code_action()<CR>')
+		vim.keymap.set('n', 'gD',    vim.lsp.buf.declaration, {buffer=bufnr})
+		vim.keymap.set('n', 'gd',    vim.lsp.buf.definition, {buffer=bufnr})
+		vim.keymap.set('n', 'K',     vim.lsp.buf.hover, {buffer=bufnr})
+		vim.keymap.set('n', 'gi',    vim.lsp.buf.implementation, {buffer=bufnr})
+		vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, {buffer=bufnr})
+		vim.keymap.set('n', ' wa',   vim.lsp.buf.add_workspace_folder, {buffer=bufnr})
+		vim.keymap.set('n', ' wr',   vim.lsp.buf.remove_workspace_folder, {buffer=bufnr})
+		vim.keymap.set('n', ' wl',   function() vim.pretty_print(vim.lsp.buf.list_workspace_folders()) end, {buffer=bufnr})
+		vim.keymap.set('n', ' D',    vim.lsp.buf.type_definition, {buffer=bufnr})
+		vim.keymap.set('n', ' r',    vim.lsp.buf.rename, {buffer=bufnr})
+		vim.keymap.set('n', 'gr',    vim.lsp.buf.references, {buffer=bufnr})
+		vim.keymap.set('n', ' e',    vim.diagnostic.open_float, {buffer=bufnr})
+		vim.keymap.set('n', '[d',    vim.diagnostic.goto_prev, {buffer=bufnr})
+		vim.keymap.set('n', ']d',    vim.diagnostic.goto_next, {buffer=bufnr})
+		vim.keymap.set('n', ' q',    vim.diagnostic.setloclist, {buffer=bufnr})
+		vim.keymap.set('n', ' a',    vim.lsp.buf.code_action, {buffer=bufnr})
 
 		-- Set some keybinds conditional on server capabilities
-		if client.resolved_capabilities.document_formatting then
-			buf_set_keymap('n', ' f', ':lua vim.lsp.buf.formatting()<CR>')
+		vim.opt_local.formatexpr = vim.go.formatexpr
+		if client.server_capabilities.documentFormattingProvider then
+			vim.keymap.set('n', ' f', function() vim.lsp.buf.format{} end, {buffer=bufnr})
 		end
-		if client.resolved_capabilities.document_range_formatting then
-			buf_set_keymap('v', ' f', ':lua vim.lsp.buf.range_formatting()<CR>')
+		if client.server_capabilities.documentRangeFormattingProvider then
+			vim.keymap.set('v', ' f', function() vim.lsp.buf.format{}; vim.api.nvim_input('<Esc>') end, {buffer=bufnr})
 		end
-
-		-- Show signature help automatically
-		require'lsp_signature'.on_attach{
-			bind = true,
-			hint_enable = false,
-			handler_opts = {
-				border = floatBorder,
-			},
-		}
 	end
 
 	local oldnotify = vim.notify
@@ -399,12 +430,22 @@ table.insert(after, function()
 		},
 	}
 	lspconfig.omnisharp.setup{
-		cmd = { 'omnisharp', '-lsp', '-hpid', tostring(vim.fn.getpid()) },
+		cmd = { 'omnisharp' },
 	}
 	lspconfig.rust_analyzer.setup{}
+	lspconfig.hls.setup{}
 end)
 
 Plug 'ray-x/lsp_signature.nvim'
+table.insert(after, function()
+	require'lsp_signature'.setup{
+		bind = true,
+		hint_enable = false,
+		handler_opts = {
+			border = floatBorder,
+		},
+	}
+end)
 
 Plug 'hrsh7th/nvim-compe'
 table.insert(after, function()
@@ -447,10 +488,16 @@ table.insert(after, function()
 		},
 		indent = {
 			enable = true,
-			disable = { 'python' },
+			disable = { 'python', 'c', 'cpp' },
 		},
 	}
 end)
+
+Plug 'PeterRincker/vim-argumentative'
+
+Plug 'vito-c/jq.vim'
+
+Plug 'tpope/vim-surround'
 
 vim.call('plug#end')
 
@@ -460,7 +507,6 @@ for k,v in pairs(vim.g.plugs) do
 		break
 	end
 end
-
 
 for k,v in ipairs(after) do
 	v()
