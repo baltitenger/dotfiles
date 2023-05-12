@@ -49,6 +49,19 @@ autocmd('FileType', { pattern = 'markdown', command = [[
 autocmd('FileType', { pattern = 'cs', command = [[compiler dotnet]]})
 autocmd('FileType', { pattern = 'haskell', command = [[set ts=8 sw=2 et]]})
 
+autocmd('BufNewFile', { nested = true, callback = function(info)
+	local match = vim.fn.matchlist(info.file, [[^\(.\{-1,}\)[(:]\(\d\+\)\%(:\(\d\+\):\?\)\?$]])
+	if #match == 0 then return end
+	local file, row, col = match[2], tonumber(match[3]), tonumber('0'..match[4])
+	if vim.fn.filereadable(file) == 0 then return end
+	vim.cmd('keepalt edit +'..row..' '..vim.fn.fnameescape(file))
+	if col > 1 then
+		vim.cmd('normal! 0'..(col-1)..'l')
+	else
+		vim.cmd('normal! 0')
+	end
+end})
+
 vim.cmd[==[
 au BufWritePre /tmp/* setlocal noundofile
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line('$') && &ft !~# 'commit' | exe 'normal! g`"' | endif
@@ -159,6 +172,7 @@ comment_map = {
 	rust       = '//',
 	scala      = '//',
 	conf       = '#',
+	cmake      = '#',
 	desktop    = '#',
 	fstab      = '#',
 	make       = '#',
@@ -166,6 +180,7 @@ comment_map = {
 	ruby       = '#',
 	sh         = '#',
 	i3config   = '#',
+	perl       = '#',
 	bat        = 'REM',
 	lua        = '--',
 	haskell    = '--',
@@ -317,7 +332,7 @@ vim.g.easy_align_delimiters = {
 	},
 }
 
-Plug 'bogado/file-line'
+-- Plug 'bogado/file-line'
 
 -- Plug 'sakhnik/nvim-gdb'
 
@@ -338,8 +353,7 @@ table.insert(after, function()
 		vim.api.nvim_buf_clear_namespace(bufnr, test_ns, 0, -1)
 		local real_diags = {}
 		for _, diag in pairs(result.diagnostics) do
-			if diag.severity == vim.lsp.protocol.DiagnosticSeverity.Hint and diag.tags
-					and vim.tbl_contains(diag.tags, vim.lsp.protocol.DiagnosticTag.Unnecessary) then
+			if diag.tags and vim.tbl_contains(diag.tags, vim.lsp.protocol.DiagnosticTag.Unnecessary) then
 				pcall(vim.api.nvim_buf_set_extmark, bufnr, test_ns,
 						diag.range.start.line, diag.range.start.character, {
 					end_row = diag.range['end'].line,
@@ -353,8 +367,14 @@ table.insert(after, function()
 		result.diagnostics = real_diags
 		vim.lsp.diagnostic.on_publish_diagnostics(_, result, ctx, config)
 	end
-	lspconfig.util.default_config.capabilities
-		.textDocument.completion.completionItem.snippetSupport = true
+	caps = require('cmp_nvim_lsp').default_capabilities()
+	caps.textDocument.completion.completionItem.snippetSupport = true
+	caps.textDocument.publishDiagnostics = {
+		tagSupport = {
+			valueSet = { 1 } 
+		}
+	}
+	lspconfig.util.default_config.capabilities = caps
 	lspconfig.util.default_config.on_attach = function(client, bufnr)
 		-- Mappings.
 		vim.keymap.set('n', 'gD',    vim.lsp.buf.declaration, {buffer=bufnr})
@@ -382,6 +402,11 @@ table.insert(after, function()
 		if client.server_capabilities.documentRangeFormattingProvider then
 			vim.keymap.set('v', ' f', function() vim.lsp.buf.format{}; vim.api.nvim_input('<Esc>') end, {buffer=bufnr})
 		end
+
+		-- workaround for omnisharp's messed up semantic tokens
+		if client.name == 'omnisharp' then
+			client.server_capabilities.semanticTokensProvider = nil
+		end
 	end
 
 	local oldnotify = vim.notify
@@ -391,7 +416,7 @@ table.insert(after, function()
 	end
 
 	lspconfig.clangd.setup{
-		cmd = { 'clangd', '--background-index', '--clang-tidy', '--completion-style=detailed', '--header-insertion=iwyu', '--query-driver=/usr/bin/*-gcc,/usr/bin/*-g++' },
+		cmd = { 'clangd', '--background-index', '--clang-tidy', '--completion-style=detailed', '--header-insertion=iwyu', '--query-driver=/usr/bin/*,/home/baltazar/.espressif/tools/**/bin/*' },
 	}
 	lspconfig.html.setup{
 		cmd = { 'vscode-html-languageserver', '--stdio' },
@@ -434,6 +459,7 @@ table.insert(after, function()
 	}
 	lspconfig.rust_analyzer.setup{}
 	lspconfig.hls.setup{}
+	-- lspconfig.jdtls.setup{}
 end)
 
 Plug 'ray-x/lsp_signature.nvim'
@@ -447,31 +473,80 @@ table.insert(after, function()
 	}
 end)
 
-Plug 'hrsh7th/nvim-compe'
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-path'
+Plug 'hrsh7th/cmp-cmdline'
+Plug 'hrsh7th/cmp-vsnip'
+Plug 'hrsh7th/cmp-omni'
+Plug 'hrsh7th/nvim-cmp'
 table.insert(after, function()
-  require'compe'.setup({
-    enabled = true,
-		autocomplete = true,
-		documentation = {
-			border = floatBorder,
+	local cmp = require 'cmp'
+
+	cmp.setup({
+		snippet = {
+			expand = function(args) vim.fn["vsnip#anonymous"](args.body) end,
 		},
-    source = {
-      path = true,
-      buffer = true,
-      nvim_lsp = true,
-			vsnip = true,
-    },
-  })
-	vim.api.nvim_set_keymap('i', '<CR>', "compe#confirm('<CR>')", { silent = true, expr = true, noremap = true })
+		window = {
+			-- completion = cmp.config.window.bordered(),
+			documentation = cmp.config.window.bordered{border = floatBorder},
+		},
+		mapping = cmp.mapping.preset.insert({
+			['<C-b>'] = cmp.mapping.scroll_docs(-4),
+			['<C-f>'] = cmp.mapping.scroll_docs(4),
+			['<C-Space>'] = cmp.mapping.complete(),
+			['<C-e>'] = cmp.mapping.abort(),
+			['<CR>'] = cmp.mapping.confirm({ select = false }),
+		}),
+		sources = cmp.config.sources({
+			{ name = 'nvim_lsp' },
+			{ name = 'vsnip' },
+			-- { name = 'omni' },
+		}, {
+			{ name = 'path' },
+			{ name = 'buffer' },
+		})
+	})
+
+	-- -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
+	-- cmp.setup.cmdline({ '/', '?' }, {
+	-- 	mapping = cmp.mapping.preset.cmdline(),
+	-- 	sources = {
+	-- 		{ name = 'buffer' }
+	-- 	}
+	-- })
+
+	-- -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+	-- cmp.setup.cmdline(':', {
+	-- 	mapping = cmp.mapping.preset.cmdline(),
+	-- 	sources = cmp.config.sources({
+	-- 		{ name = 'path' }
+	-- 	}, {
+	-- 		{ name = 'cmdline' }
+	-- 	})
+	-- })
+
+	-- require'cmp'.setup({
+	-- 	enabled = true,
+	-- 	autocomplete = true,
+	-- 	documentation = {
+	-- 		border = floatBorder,
+	-- 	},
+	-- 	source = {
+	-- 		path = true,
+	-- 		buffer = true,
+	-- 		nvim_lsp = true,
+	-- 		vsnip = true,
+	-- 	},
+	-- })
+	-- vim.keymap.set('i', '<CR>', "compe#confirm('<CR>')", { expr = true, replace_keycodes = false })
 end)
 
 Plug 'hrsh7th/vim-vsnip'
 Plug 'hrsh7th/vim-vsnip-integ'
 vim.g.vsnip_snippet_dir = vim.fn.stdpath('config')..'/vsnip'
-vim.api.nvim_set_keymap('i', '<Tab>',   "vsnip#jumpable(1)  ? '<Plug>(vsnip-jump-next)' : '<Tab>'", { expr = true})
-vim.api.nvim_set_keymap('s', '<Tab>',   "vsnip#jumpable(1)  ? '<Plug>(vsnip-jump-next)' : '<Tab>'", { expr = true})
-vim.api.nvim_set_keymap('i', '<S-Tab>', "vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<S-Tab>'", { expr = true})
-vim.api.nvim_set_keymap('s', '<S-Tab>', "vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<S-Tab>'", { expr = true})
+vim.keymap.set({'i', 's'}, '<Tab>',   "vsnip#jumpable(1)  ? '<Plug>(vsnip-jump-next)' : '<Tab>'", { expr = true, remap = true, replace_keycodes = false });
+vim.keymap.set({'i', 's'}, '<S-Tab>', "vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<Tab>'", { expr = true, remap = true, replace_keycodes = false });
 
 Plug 'qpkorr/vim-renamer'
 vim.g.RenamerSupportColonWToRename = 1
@@ -487,8 +562,8 @@ table.insert(after, function()
 			enable = true,
 		},
 		indent = {
-			enable = true,
-			disable = { 'python', 'c', 'cpp' },
+			enable = false,
+			-- disable = { 'python', 'c', 'cpp' },
 		},
 	}
 end)
@@ -498,6 +573,17 @@ Plug 'PeterRincker/vim-argumentative'
 Plug 'vito-c/jq.vim'
 
 Plug 'tpope/vim-surround'
+
+Plug 'mattn/emmet-vim'
+vim.g.user_emmet_leader_key = '<C-S>'
+
+Plug 'mfussenegger/nvim-jdtls'
+autocmd('FileType', { pattern = 'java', callback = function()
+	require'jdtls'.start_or_attach{
+		cmd = {'jdtls'},
+		on_attach = require'lspconfig'.util.default_config.on_attach
+	}
+end})
 
 vim.call('plug#end')
 

@@ -65,11 +65,12 @@ envik() {
 }
 
 eval `dircolors -b | sed 's/40;//g'`
-alias ls='ls -F --color=auto'
+alias ls='ls -F --color=auto --hyperlink=auto'
 alias grep='grep --color=auto'
 alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias diff='diff --color=auto'
+alias ip='ip --color=auto'
 alias tar='tar --totals=SIGUSR1'
 alias ffmpeg='ffmpeg -hide_banner'
 alias ffplay='ffplay -hide_banner'
@@ -80,6 +81,7 @@ alias tb='nc termbin.com 9999'
 alias ix="curl -F 'f:1=<-' ix.io"
 alias bp="curl -F 'raw=<-' https://bpa.st/curl"
 alias imgur="{ curl -sH 'Authorization: Client-ID 0bffa5b4ac8383c' -F 'image=<-' https://api.imgur.com/3/image | jq -r .data.link; }"
+alias 0x0="curl -F'file=@-' http://0x0.st"
 alias man=$'LESS_TERMCAP_md="\e[01;91m" LESS_TERMCAP_me="\e[0m" LESS_TERMCAP_us="\e[01;32m" LESS_TERMCAP_ue="\e[0m" man'
 alias sudo='sudo '
 alias dotnet='DOTNET_CLI_TELEMETRY_OPTOUT=1 dotnet'
@@ -94,18 +96,20 @@ alias armexec='bwrap --unshare-ipc --unshare-pid --unshare-uts --unshare-cgroup 
 alias aarch64exec='bwrap --unshare-ipc --unshare-pid --unshare-uts --unshare-cgroup --hostname aarch64-chroot \
 --bind ~/stuff/aarch64-chroot / --bind ~ ~ --proc /proc --dev /dev --tmpfs /tmp --tmpfs /run \
 --ro-bind /etc/resolv.conf /run/systemd/resolve/resolv.conf --bind /mnt /mnt'
-alias sshirssi='ssh minerva -t tmux -f ~/.irssi/tmux.conf new -An irssi irssi'
+alias sshirssi='ssh minerva -t tmux -f ~/.irssi/tmux.conf new -As irssi irssi'
 alias pacdiff='DIFFPROG=nvim\ -d pacdiff'
 alias xfreerdp='xfreerdp /floatbar:sticky:off,show:always /workarea -decorations /drive:share,"$HOME/Downloads"'
-alias wlfreerdp='wlfreerdp /size:"$(swaymsg -t get_tree | jq -r '\''recurse(.nodes[])|select(.focused).rect|"\(.width)x\(.height)"'\'')"'
+alias wlfreerdp='wlfreerdp /size:"$(swaymsg -t get_tree | jq -r '\''..|select(.focused?).rect|"\(.width)x\(.height)"'\'')"'
 alias ytmmix='mpv --vid=no --ytdl-raw-options=cookies-from-browser=chromium+gnomekeyring ytdl://RDTMAK5uy_kset8DisdE7LSD4TNjEVvrKRTmG7a56sY'
 alias texdoc='LC_ALL="$LANG" texdoc'
 alias userctl='systemctl --user'
+alias cmake='CMAKE_EXPORT_COMPILE_COMMANDS=ON PICO_SDK_PATH=~/stuff/pico-sdk PICO_EXTRAS_PATH=~/stuff/pico-extras FREERTOS_KERNEL_PATH=~/stuff/FreeRTOS-Kernel CMAKE_GENERATOR=Ninja cmake'
 
 # [ "$XDG_SESSION_TYPE" = tty ] && alias sway='exec systemd-cat systemd-run --user --scope -u sway-session -E TERMINAL="foot -dwarning" -E QT_QPA_PLATFORMTHEME=kde -E XDG_CURRENT_DESKTOP=sway -E ASAN_OPTIONS="disable_coredump=0:unmap_shadow_on_exit=1:abort_on_error=1:detect_leaks=0" -E UBSAN_OPTIONS=print_stacktrace=1 sway'
-[ "$XDG_SESSION_TYPE" = tty ] && alias sway='systemctl --user reset-failed; exec systemd-cat systemd-run --user --scope -u sway-session -E TERMINAL="foot -dwarning" -E QT_QPA_PLATFORMTHEME=kde -E XDG_CURRENT_DESKTOP=sway sway'
+# [ "$XDG_SESSION_TYPE" = tty ] && alias sway='systemctl --user reset-failed; exec systemd-cat systemd-run --user --scope -u sway-session -E TERMINAL="foot -dwarning" -E QT_QPA_PLATFORMTHEME=kde -E XDG_CURRENT_DESKTOP=sway -E WLR_DRM_NO_ATOMIC=1 sway'
+[ "$XDG_SESSION_TYPE" = tty ] && alias sway='systemctl --user reset-failed; exec systemd-cat systemd-run --user --scope -u sway-session -E TERMINAL=foot -E QT_QPA_PLATFORMTHEME=kde -E XDG_CURRENT_DESKTOP=sway -E SDL_VIDEODRIVER=wayland sway'
 
-camurl='https://10.42.0.200:8080/video'
+camurl='http://192.168.189.170:8080/video'
 camstart() {
 	adb shell -tt "su -c 'am start-activity com.pas.webcam/.Rolling'" </dev/null
 }
@@ -115,8 +119,19 @@ camstop() {
 	adb shell input keyevent KEYCODE_POWER
 }
 camstream() {
-	ffmpeg -i "$camurl" "$@" -vcodec rawvideo -pix_fmt yuv420p -f v4l2 /dev/video2 &&
-		adb shell am force-stop com.pas.webcam
+	filter=''
+	while
+		[ "$filter" ] && opt=(-vf "$filter") || opt=()
+		ffmpeg -v error -i "$camurl" ${opt[@]} -vcodec rawvideo -pix_fmt yuv420p -f v4l2 /dev/video2 </dev/null &
+		read -e filter
+	do
+		kill $!
+		wait $!
+		history -s "$filter"
+	done
+	kill $!
+	wait $!
+		# adb shell am force-stop com.pas.webcam
 		#{ camstop 3 & disown $!; }
 }
 

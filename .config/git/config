@@ -26,6 +26,7 @@
 	dt = difftool
 	wt = worktree
 	cp = cherry-pick
+	sm = submodule
 [init]
 	defaultBranch = master
 [filter "lfs"]

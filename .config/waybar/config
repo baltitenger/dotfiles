@@ -54,6 +54,7 @@
 		// "device": "acpi_video1",
 		"format": "{percent}% {icon}",
 		"format-icons": ["🔅", "🔆"],
+		// "format-icons": ["", "", "", "", "", "", "", "", ""],
 		"on-scroll-up":   "brightnessctl -n -e set 1%+",
 		"on-scroll-down": "brightnessctl -n -e set 1%-"
 	},
@@ -67,7 +68,6 @@
 		"format": "{capacity}% {icon}",
 		"format-charging": "{capacity}% ",
 		"format-plugged": "{capacity}% ",
-		"format-alt": "{time} {icon}",
 		"format-full": "",
 		"format-icons": ["", "", "", "", ""]
 	},
@@ -80,7 +80,6 @@
 		"format": "{capacity}% {icon}",
 		"format-charging": "{capacity}% ",
 		"format-plugged": "{capacity}% ",
-		"format-alt": "{time} {icon}",
 		"format-full": "",
 		"format-icons": ["", "", "", "", ""]
 	},
@@ -122,7 +121,7 @@
 			"Paused": " "
 		},
 		"max-length":70,
-		"exec": "playerctl -a metadata --format '{\"text\": \"{{artist}} - {{markup_escape(title)}}\", \"tooltip\": \"{{playerName}}: {{artist}} - {{markup_escape(album)}} - {{markup_escape(title)}}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' -F",
+		"exec": "playerctl metadata -Ff '{\"text\": \"{{markup_escape(artist)}} - {{markup_escape(title)}}\", \"tooltip\": \"{{markup_escape(playerName)}}: {{markup_escape(artist)}} - {{markup_escape(album)}} - {{markup_escape(title)}}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}'",
 		"on-click": "playerctl play-pause"
 	}
 }

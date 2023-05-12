@@ -10,8 +10,10 @@ set $right l
 
 ### Output configuration
 set $laptop eDP-1
-bindswitch --reload --locked lid:on  output $laptop disable
-bindswitch --reload --locked lid:off output $laptop enable
+#bindswitch --reload --locked lid:on  output $laptop disable
+#bindswitch --reload --locked lid:off output $laptop enable
+
+output eDP-1 max_render_time 2
 
 workspace number 1
 
@@ -27,6 +29,7 @@ gaps inner 10
 smart_gaps on
 workspace_layout tabbed
 hide_edge_borders --i3 none
+seat * xcursor_theme breeze_cursors 24
 
 ### Input configuration
 # You can get the names of your inputs by running: swaymsg -t get_inputs
@@ -53,6 +56,7 @@ input type:touchpad {
 
 	# Kill focused window
 	bindsym $mod+Shift+q kill
+	bindsym Ctrl+Alt+Escape exec "kill `swaymsg -t get_tree | jq '..|select(.focused?).pid'`"
 
 	# Start your launcher (managed by systemd)
 	bindsym $mod+d exec echo >"$XDG_RUNTIME_DIR/j4-dmenu-desktop.sock"
@@ -74,19 +78,21 @@ input type:touchpad {
 	bindsym          $mod+Ctrl+L exec swaylock
 	bindsym --locked Ctrl+Alt+K  input type:keyboard xkb_switch_layout next
 
-	# type zero width space
+	# zwsp, type zero width space
 	bindsym          $mod+alt+space  exec wtype ​
 
 	bindsym Print       exec wl-sshot rect
 	bindsym Shift+Print exec wl-sshot active
 	bindsym Ctrl+Print  exec wl-sshot full
 
-	bindsym $mod+Ctrl+m exec mpv "ytdl://$(wl-paste -n)"
+	bindsym $mod+Ctrl+m exec mpv "$(wl-paste -n)"
+	bindsym $mod+Ctrl+i exec curl -fL "$(wl-paste -n)" | imv -
+	bindsym $mod+Ctrl+p exec systemctl --user reload swww-shuf.service
 
 	bindsym $mod+o       output * power on
 	bindsym $mod+Shift+o output * power off
 
-	bindsym $mod+Alt+i workspace number 2, exec chromium, workspace number 3, exec element-desktop, workspace number 1
+	bindsym $mod+Alt+i workspace number 2, exec chromium, workspace number 3, exec nheko, workspace number 1
 
 	# disable menubar toggle in electron apps
 	bindsym      Alt_L nop
@@ -235,6 +241,7 @@ mode $exitmode {
 #
 exec dbus-update-activation-environment --systemd \
 	DISPLAY WAYLAND_DISPLAY SWAYSOCK TERMINAL QT_QPA_PLATFORMTHEME XDG_CURRENT_DESKTOP \
+	&& systemctl --user restart xdg-desktop-portal.service \
 	&& systemctl --user start sway-session.target
 
 #
@@ -250,9 +257,11 @@ for_window [class="XEyes"] {
 	sticky enable
 }
 
-for_window [app_id="org.kde.okular" title="New Text Note — Okular"] {
-	floating enable
-}
+for_window [app_id="org.kde.okular"  title="New Text Note — Okular"] floating enable
+for_window [app_id="org.kde.dolphin" title="Copying — Dolphin"     ] floating enable
+for_window [class="Steam"            title="Steam - News"          ] floating enable
+assign [app_id="chromium"] workspace number 2
+for_window [app_id="clonehero"] max_render_time 1
 
 no_focus   [floating app_id="" title=".* is sharing your screen\."]
 for_window [floating app_id="" title=".* is sharing your screen\."] {
