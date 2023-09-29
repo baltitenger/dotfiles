@@ -13,7 +13,8 @@ source /usr/share/bash-complete-alias/complete_alias 2>/dev/null &&
 
 source /usr/share/git/git-prompt.sh 2>/dev/null &&
 	GIT_PS1_COMPRESSSPARSESTATE=1 GIT_PS1_SHOWSTASHSTATE=1 \
-	GIT_PS1_SHOWUPSTREAM=auto GIT_PS1_STATESEPARATOR=
+	GIT_PS1_SHOWUPSTREAM=auto GIT_PS1_STATESEPARATOR= \
+	GIT_PS1_DESCRIBE_STYLE=branch
 SHORTPS1=$'\[\e]133;A\e\\\e]2;\u@\h:\W\a\]$(x=$?;((\j))&&echo -E \'\[\e[1;35m\]\j\';exit $((x==0?32:31)))\[\e[1;$?m\]\$\[\e[0m\] '
 [ -n "$SWAYSOCK" ] && SHORTPS1=$'\[\e]7;file://$PWD\a\]'"$SHORTPS1"
 longps1() {
@@ -82,7 +83,8 @@ alias ix="curl -F 'f:1=<-' ix.io"
 alias bp="curl -F 'raw=<-' https://bpa.st/curl"
 alias imgur="{ curl -sH 'Authorization: Client-ID 0bffa5b4ac8383c' -F 'image=<-' https://api.imgur.com/3/image | jq -r .data.link; }"
 alias 0x0="curl -F'file=@-' http://0x0.st"
-alias man=$'LESS_TERMCAP_md="\e[01;91m" LESS_TERMCAP_me="\e[0m" LESS_TERMCAP_us="\e[01;32m" LESS_TERMCAP_ue="\e[0m" man'
+# alias man=$'LESS_TERMCAP_md="\e[01;91m" LESS_TERMCAP_me="\e[0m" LESS_TERMCAP_us="\e[01;32m" LESS_TERMCAP_ue="\e[0m" man'
+alias man="MANPAGER='less -Dd+r -DuG' GROFF_NO_SGR= man"
 alias sudo='sudo '
 alias dotnet='DOTNET_CLI_TELEMETRY_OPTOUT=1 dotnet'
 # alias armexec="bwrap --unshare-ipc --unshare-pid --unshare-uts --unshare-cgroup --hostname arm-chroot \
@@ -103,7 +105,8 @@ alias wlfreerdp='wlfreerdp /size:"$(swaymsg -t get_tree | jq -r '\''..|select(.f
 alias ytmmix='mpv --vid=no --ytdl-raw-options=cookies-from-browser=chromium+gnomekeyring ytdl://RDTMAK5uy_kset8DisdE7LSD4TNjEVvrKRTmG7a56sY'
 alias texdoc='LC_ALL="$LANG" texdoc'
 alias userctl='systemctl --user'
-alias cmake='CMAKE_EXPORT_COMPILE_COMMANDS=ON PICO_SDK_PATH=~/stuff/pico-sdk PICO_EXTRAS_PATH=~/stuff/pico-extras FREERTOS_KERNEL_PATH=~/stuff/FreeRTOS-Kernel CMAKE_GENERATOR=Ninja cmake'
+# alias cmake='CMAKE_EXPORT_COMPILE_COMMANDS=ON PICO_SDK_PATH=~/stuff/pico-sdk PICO_EXTRAS_PATH=~/stuff/pico-extras FREERTOS_KERNEL_PATH=~/stuff/FreeRTOS-Kernel CMAKE_GENERATOR=Ninja cmake'
+alias cmake='CMAKE_EXPORT_COMPILE_COMMANDS=ON PICO_SDK_PATH=~/stuff/pico-sdk PICO_EXTRAS_PATH=~/stuff/pico-extras CMAKE_GENERATOR=Ninja cmake'
 
 # [ "$XDG_SESSION_TYPE" = tty ] && alias sway='exec systemd-cat systemd-run --user --scope -u sway-session -E TERMINAL="foot -dwarning" -E QT_QPA_PLATFORMTHEME=kde -E XDG_CURRENT_DESKTOP=sway -E ASAN_OPTIONS="disable_coredump=0:unmap_shadow_on_exit=1:abort_on_error=1:detect_leaks=0" -E UBSAN_OPTIONS=print_stacktrace=1 sway'
 # [ "$XDG_SESSION_TYPE" = tty ] && alias sway='systemctl --user reset-failed; exec systemd-cat systemd-run --user --scope -u sway-session -E TERMINAL="foot -dwarning" -E QT_QPA_PLATFORMTHEME=kde -E XDG_CURRENT_DESKTOP=sway -E WLR_DRM_NO_ATOMIC=1 sway'

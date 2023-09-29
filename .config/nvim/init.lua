@@ -181,6 +181,7 @@ comment_map = {
 	sh         = '#',
 	i3config   = '#',
 	perl       = '#',
+	yaml       = '#',
 	bat        = 'REM',
 	lua        = '--',
 	haskell    = '--',
@@ -554,10 +555,10 @@ vim.g.RenamerSupportColonWToRename = 1
 Plug 'peterhoeg/vim-qml'
 
 Plug('nvim-treesitter/nvim-treesitter', { ['do'] = ':TSUpdate' })
-Plug 'nvim-treesitter/playground'
+-- Plug 'nvim-treesitter/playground'
 table.insert(after, function()
 	require'nvim-treesitter.configs'.setup {
-		ensure_installed = { 'c', 'cpp', 'html', 'css', 'javascript' },
+		ensure_installed = { 'cpp', 'html', 'css', 'javascript' },
 		highlight = {
 			enable = true,
 		},
@@ -584,6 +585,8 @@ autocmd('FileType', { pattern = 'java', callback = function()
 		on_attach = require'lspconfig'.util.default_config.on_attach
 	}
 end})
+
+Plug 'mikebentley15/vim-pio'
 
 vim.call('plug#end')
 

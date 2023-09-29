@@ -13,7 +13,9 @@ set $laptop eDP-1
 #bindswitch --reload --locked lid:on  output $laptop disable
 #bindswitch --reload --locked lid:off output $laptop enable
 
-output eDP-1 max_render_time 2
+output $laptop max_render_time 2
+
+xwayland enable
 
 workspace number 1
 
@@ -46,6 +48,8 @@ input type:touchpad {
 	drag enabled
 	tap enabled
 }
+
+input 1267:10372:ELAN_Touchscreen map_to_output $laptop
 
 ### Key bindings
 #
@@ -92,7 +96,7 @@ input type:touchpad {
 	bindsym $mod+o       output * power on
 	bindsym $mod+Shift+o output * power off
 
-	bindsym $mod+Alt+i workspace number 2, exec chromium, workspace number 3, exec nheko, workspace number 1
+	bindsym $mod+Alt+i workspace number 2, exec chromium, workspace number 3, exec nheko -p default, workspace number 1
 
 	# disable menubar toggle in electron apps
 	bindsym      Alt_L nop
@@ -266,6 +270,11 @@ for_window [app_id="clonehero"] max_render_time 1
 no_focus   [floating app_id="" title=".* is sharing your screen\."]
 for_window [floating app_id="" title=".* is sharing your screen\."] {
 	move absolute position -100000 -100000
+}
+
+for_window [app_id="cst"] {
+	floating enable
+	move position 1120 0
 }
 
 bar {
