@@ -15,8 +15,8 @@ source /usr/share/git/git-prompt.sh 2>/dev/null &&
 	GIT_PS1_COMPRESSSPARSESTATE=1 GIT_PS1_SHOWSTASHSTATE=1 \
 	GIT_PS1_SHOWUPSTREAM=auto GIT_PS1_STATESEPARATOR= \
 	GIT_PS1_DESCRIBE_STYLE=branch
-SHORTPS1=$'\[\e]133;A\e\\\e]2;\u@\h:\W\a\]$(x=$?;((\j))&&echo -E \'\[\e[1;35m\]\j\';exit $((x==0?32:31)))\[\e[1;$?m\]\$\[\e[0m\] '
-[ -n "$SWAYSOCK" ] && SHORTPS1=$'\[\e]7;file://$PWD\a\]'"$SHORTPS1"
+SHORTPS1=$'\[\e]133;A\e\\\e]2;\u@\h:\W\e\]$(x=$?;((\j))&&echo -E \'\[\e[1;35m\]\j\';exit $((x==0?32:31)))\[\e[1;$?m\]\$\[\e[0m\] '
+[ -n "$SWAYSOCK" ] && SHORTPS1=$'\[\e]7;file://$PWD\e\]'"$SHORTPS1"
 longps1() {
 	PS1=$'\[\e[1;36m\][\[\e[32m\]\u\[\e[36m\]@\[\e[33m\]\h\[\e[36m\]:\[\e[34m\]\W'
 	[ "`type -t __git_ps1`" == function ] && PS1+=$'$(__git_ps1 \'\[\e[36m\]#\[\e[00;32m\]%s\')'
@@ -56,8 +56,8 @@ envdbg() {
 	LDFLAGS='-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now'
 }
 envrel() {
-	CFLAGS='-O2 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra -g -flto=auto'
-	CXXFLAGS='-O2 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra -g -Wp,-D_GLIBCXX_ASSERTIONS -std=c++20 -flto=auto'
+	CFLAGS='-O2 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra -Wno-unused-parameter -g -flto=auto'
+	CXXFLAGS='-O2 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=2 -Wall -Wextra -Wno-unused-parameter -g -Wp,-D_GLIBCXX_ASSERTIONS -std=c++20 -flto=auto'
 	LDFLAGS='-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now -flto=auto'
 }
 envik() {

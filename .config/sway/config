@@ -13,7 +13,7 @@ set $laptop eDP-1
 #bindswitch --reload --locked lid:on  output $laptop disable
 #bindswitch --reload --locked lid:off output $laptop enable
 
-output $laptop max_render_time 2
+#output $laptop max_render_time 4
 
 xwayland enable
 
@@ -29,7 +29,7 @@ font 'Noto Sans 11'
 default_border none
 gaps inner 10
 smart_gaps on
-workspace_layout tabbed
+workspace_layout default
 hide_edge_borders --i3 none
 seat * xcursor_theme breeze_cursors 24
 
@@ -49,7 +49,7 @@ input type:touchpad {
 	tap enabled
 }
 
-input 1267:10372:ELAN_Touchscreen map_to_output $laptop
+exec swaymsg input 1267:10372:ELAN_Touchscreen map_to_output $laptop
 
 ### Key bindings
 #
@@ -80,10 +80,10 @@ input 1267:10372:ELAN_Touchscreen map_to_output $laptop
 	bindsym          $mod+S      sticky toggle
 	bindsym --locked $mod+Ctrl+S exec systemctl suspend
 	bindsym          $mod+Ctrl+L exec swaylock
-	bindsym --locked Ctrl+Alt+K  input type:keyboard xkb_switch_layout next
+	bindsym --locked $mod+Ctrl+K input type:keyboard xkb_switch_layout next
 
 	# zwsp, type zero width space
-	bindsym          $mod+alt+space  exec wtype ​
+	bindsym          $mod+alt+space exec wtype ​
 
 	bindsym Print       exec wl-sshot rect
 	bindsym Shift+Print exec wl-sshot active
@@ -92,6 +92,13 @@ input 1267:10372:ELAN_Touchscreen map_to_output $laptop
 	bindsym $mod+Ctrl+m exec mpv "$(wl-paste -n)"
 	bindsym $mod+Ctrl+i exec curl -fL "$(wl-paste -n)" | imv -
 	bindsym $mod+Ctrl+p exec systemctl --user reload swww-shuf.service
+	bindsym $mod+Ctrl+c exec foot -a qalc qalc
+
+	## spotify stuff
+	# queue
+	bindsym $mod+Ctrl+e exec wtype -M alt j -m alt -k up -k up -k up -k up -k up -k up -k return
+	# playlist add
+	bindsym $mod+Ctrl+y exec wtype -M alt j -m alt -k down -k right -k down -k down
 
 	bindsym $mod+o       output * power on
 	bindsym $mod+Shift+o output * power off
@@ -113,10 +120,10 @@ input 1267:10372:ELAN_Touchscreen map_to_output $laptop
 	bindsym Alt+Shift+Tab focus prev
 
 	# Move the focused window with the same, but add Shift
-	bindsym $mod+Shift+$left  move left  20 px
-	bindsym $mod+Shift+$down  move down  20 px
-	bindsym $mod+Shift+$up    move up    20 px
-	bindsym $mod+Shift+$right move right 20 px
+	bindsym $mod+Shift+$left  exec swaymove left
+	bindsym $mod+Shift+$down  exec swaymove down
+	bindsym $mod+Shift+$up    exec swaymove up
+	bindsym $mod+Shift+$right exec swaymove right
 #
 # Workspaces:
 #
@@ -214,6 +221,16 @@ mode $exitmode {
 	bindsym Escape mode "default"
 }
 
+bindsym $mod+Shift+w mode "workspace"
+mode "workspace" {
+	bindsym $left  move workspace to output left,  mode default
+	bindsym $up    move workspace to output up,    mode default
+	bindsym $down  move workspace to output down,  mode default
+	bindsym $right move workspace to output right, mode default
+	bindsym Return mode default
+	bindsym Escape mode default
+}
+
 
 #
 # fn keys
@@ -261,6 +278,7 @@ for_window [class="XEyes"] {
 	sticky enable
 }
 
+workspace_layout tabbed
 for_window [app_id="org.kde.okular"  title="New Text Note — Okular"] floating enable
 for_window [app_id="org.kde.dolphin" title="Copying — Dolphin"     ] floating enable
 for_window [class="Steam"            title="Steam - News"          ] floating enable
@@ -272,10 +290,11 @@ for_window [floating app_id="" title=".* is sharing your screen\."] {
 	move absolute position -100000 -100000
 }
 
-for_window [app_id="cst"] {
-	floating enable
-	move position 1120 0
-}
+for_window [app_id="imv" title="^screenshot$"] fullscreen enable global
+for_window [app_id="nheko" floating] exec "sleep 0.02; swaymsg 'fullscreen; fullscreen'"
+for_window [app_id="qalc"] floating enable
+
+exec_always kanshictl reload
 
 bar {
 	id 1
