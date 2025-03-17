@@ -1,5 +1,5 @@
 * {
-	font-family: Noto Sans, FontAwesome, Roboto, Helvetica, Arial, sans-serif;
+	font-family: Symbols Nerd Font, Noto Sans, Roboto, Helvetica, Arial, sans-serif;
 	font-size: 13px;
 }
 
@@ -25,7 +25,7 @@ window#waybar.solo {
 */
 
 window#waybar.foot {
-	background-color: rgba(0, 0, 0, 0.8);
+	background-color: rgba(0, 0, 0, 0.95);
 }
 
 #workspaces button {
@@ -58,7 +58,7 @@ window#waybar.foot {
 }
 
 #mode,
-#custom-media,
+#mpris,
 .modules-right label,
 #tray {
 	padding: 0 10px;
@@ -161,17 +161,17 @@ label:focus {
 	color: #2a5c45;
 }
 
-#custom-media {
+#mpris {
 	background-color: #66cc99;
 	color: #2a5c45;
 	min-width: 100px;
 }
 
-#custom-media.custom-spotify {
+#mpris.custom-spotify {
 	background-color: #66cc99;
 }
 
-#custom-media.custom-vlc {
+#mpris.custom-vlc {
 	background-color: #ffa000;
 }
 

@@ -2,7 +2,6 @@ set editing-mode vi
 set convert-meta off
 set completion-ignore-case On
 set blink-matching-paren On
-set colored-stats On
 set enable-bracketed-paste On
 set show-all-if-unmodified On
 set visible-stats On
@@ -16,4 +15,4 @@ set mark-symlinked-directories On
 
 "\C-L": clear-screen
 # ctrl-backspace
-"\C-H": backward-kill-word
+"\C-\b": backward-kill-word

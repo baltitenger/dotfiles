@@ -7,7 +7,7 @@
 	// "width": 1280, // Waybar width
 	"spacing": 4, // Gaps between modules (4px)
 	// Choose the order of the modules
-	"modules-left": ["sway/workspaces", "sway/mode", "custom/media"],
+	"modules-left": ["sway/workspaces", "sway/mode", "mpris"],
 	"modules-center": ["sway/window"],
 	"modules-right": ["idle_inhibitor", "pulseaudio", "network", "cpu", "memory", "temperature", "backlight", "sway/language", "battery#bat0", "battery#bat1", "clock", "tray"],
 	// Modules configuration
@@ -35,8 +35,30 @@
 	},
 	"clock": {
 		// "timezone": "America/New_York",
-		"tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-		"format-alt": "{:%Y-%m-%d}"
+		// "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+		// "format-alt": "{:%Y-%m-%d}"
+
+		"format": "{:%H:%M}",
+		"format-alt": "{:%F}",
+		"tooltip-format": "<tt><small>{calendar}</small></tt>",
+		"calendar": {
+			"mode-mon-col"  : 3,
+			"weeks-pos"     : "right",
+			"on-scroll"     : 1,
+			"on-click-right": "mode",
+			"format": {
+				"months":     "<span color='#ffead3'><b>{}</b></span>",
+				"days":       "<span color='#ecc6d9'><b>{}</b></span>",
+				"weeks":      "<span color='#99ffdd'><b>W{}</b></span>",
+				"weekdays":   "<span color='#ffcc66'><b>{}</b></span>",
+				"today":      "<span color='#ff6699'><b><u>{}</u></b></span>"
+			}
+		},
+		"actions": {
+			"on-click-right": "mode",
+			"on-scroll-up": "shift_up",
+			"on-scroll-down": "shift_down"
+		}
 	},
 	"cpu": {
 		"format": "{usage}% ",
@@ -53,10 +75,13 @@
 	"backlight": {
 		// "device": "acpi_video1",
 		"format": "{percent}% {icon}",
-		"format-icons": ["🔅", "🔆"],
+		// "format-icons": ["🔅", "🔆"],
+		// "format-icons": ["󰛩", "󱩎", "󱩏", "󱩐", "󱩑", "󱩒", "󱩓", "󱩔", "󱩕", "󱩖", "󰛨"],
 		// "format-icons": ["", "", "", "", "", "", "", "", ""],
+		"format-icons": ["", "", "", "", "", "", "", "", "", "", "", "", "", ""],
 		"on-scroll-up":   "brightnessctl -n -e set 1%+",
-		"on-scroll-down": "brightnessctl -n -e set 1%-"
+		"on-scroll-down": "brightnessctl -n -e set 1%-",
+		"tooltip": false,
 	},
 	"battery#bat0": {
 		"bat": "BAT0",
@@ -66,10 +91,11 @@
 			"critical": 15
 		},
 		"format": "{capacity}% {icon}",
-		"format-charging": "{capacity}% ",
+		"format-charging": "{capacity}% 󰂄",
 		"format-plugged": "{capacity}% ",
 		"format-full": "",
-		"format-icons": ["", "", "", "", ""]
+		// "format-icons": ["", "", "", "", ""]
+		"format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
 	},
 	"battery#bat1": {
 		"bat": "BAT1",
@@ -86,9 +112,9 @@
 	"network": {
 		// "interface": "wlp2*", // (Optional) To force the use of this interface
 		"format-wifi": "{essid} ({signalStrength}%) ",
-		"format-ethernet": "{ipaddr}/{cidr} ",
-		"tooltip-format": "{ifname} via {gwaddr} ",
-		"format-linked": "{ifname} (No IP) ",
+		"format-ethernet": "{ipaddr}/{cidr} ",
+		"tooltip-format": "{ifname} via {gwaddr} ",
+		"format-linked": "{ifname} (No IP) ",
 		"format-disconnected": "Disconnected ⚠",
 		"format-alt": "{ifname}: {ipaddr}/{cidr}"
 	},
@@ -101,9 +127,9 @@
 		"format-source": "{volume}% ",
 		"format-source-muted": "",
 		"format-icons": {
-			"headphone": "",
-			"hands-free": "",
-			"headset": "",
+			"headphone": "󰋋",
+			"hands-free": "󰥰",
+			"headset": "󰋎",
 			"phone": "",
 			"portable": "",
 			"car": "",
@@ -113,16 +139,28 @@
 		"on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
 		"on-click-middle": "pactl set-source-mute @DEFAULT_SOURCE@ toggle"
 	},
-	"custom/media": {
-		"format": "{icon}{}",
-		"return-type": "json",
-		"format-icons": {
-			"Playing": " ",
-			"Paused": " "
+	"mpris": {
+		"format": "{player_icon} {artist} - {title}",
+		"format-paused": "{status_icon} {artist} - {title}",
+		"player-icons": {
+			"default": "",
+			// "mpv": "🎵"
 		},
-		"max-length":70,
-		"exec": "playerctl metadata -Ff '{\"text\": \"{{markup_escape(artist)}} - {{markup_escape(title)}}\", \"tooltip\": \"{{markup_escape(playerName)}}: {{markup_escape(artist)}} - {{markup_escape(album)}} - {{markup_escape(title)}}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}'",
-		"on-click": "playerctl play-pause"
+		"status-icons": {
+			"paused": ""
+		},
+		// "ignored-players": ["firefox"]
 	}
+	// "custom/media": {
+	// 	"format": "{icon}{}",
+	// 	"return-type": "json",
+	// 	"format-icons": {
+	// 		"Playing": " ",
+	// 		"Paused": " "
+	// 	},
+	// 	"max-length":70,
+	// 	"exec": "playerctl metadata -Ff '{\"text\": \"{{markup_escape(artist)}} - {{markup_escape(title)}}\", \"tooltip\": \"{{markup_escape(playerName)}}: {{markup_escape(artist)}} - {{markup_escape(album)}} - {{markup_escape(title)}}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}'",
+	// 	"on-click": "playerctl play-pause"
+	// }
 }
-// vim: ft=jsonc
+// vim: ft=json5

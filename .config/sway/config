@@ -10,14 +10,18 @@ set $right l
 
 ### Output configuration
 set $laptop eDP-1
+set $main 'Dell Inc. DELL U2419H DJ1L4N2'
 #bindswitch --reload --locked lid:on  output $laptop disable
 #bindswitch --reload --locked lid:off output $laptop enable
 
-#output $laptop max_render_time 4
+output $laptop max_render_time 5
 
 xwayland enable
 
-workspace number 1
+workspace 1 output $main $laptop
+workspace 2 output $main $laptop
+workspace 3 output $laptop
+workspace 4 output $laptop
 
 # oguri & switcher started by systemd
 swaybg_command -
@@ -47,16 +51,17 @@ input type:keyboard {
 input type:touchpad {
 	drag enabled
 	tap enabled
+	drag_lock disabled
 }
 
-exec swaymsg input 1267:10372:ELAN_Touchscreen map_to_output $laptop
+input 1267:10372:ELAN_Touchscreen map_to_output $laptop
 
 ### Key bindings
 #
 # Basics:
 #
 	# Start a terminal
-	bindsym $mod+Return exec "$TERMINAL"
+	bindsym $mod+Return exec foot
 
 	# Kill focused window
 	bindsym $mod+Shift+q kill
@@ -65,7 +70,7 @@ exec swaymsg input 1267:10372:ELAN_Touchscreen map_to_output $laptop
 	# Start your launcher (managed by systemd)
 	bindsym $mod+d exec echo >"$XDG_RUNTIME_DIR/j4-dmenu-desktop.sock"
 
-	bindsym $mod+c exec bemenu-openfile
+	bindsym $mod+c exec wmenu-openfile
 
 	# Drag floating windows by holding down $mod and left mouse button.
 	# Resize them with right mouse button + $mod.
@@ -79,7 +84,7 @@ exec swaymsg input 1267:10372:ELAN_Touchscreen map_to_output $laptop
 
 	bindsym          $mod+S      sticky toggle
 	bindsym --locked $mod+Ctrl+S exec systemctl suspend
-	bindsym          $mod+Ctrl+L exec swaylock
+	bindsym --locked $mod+Ctrl+L exec swaylock
 	bindsym --locked $mod+Ctrl+K input type:keyboard xkb_switch_layout next
 
 	# zwsp, type zero width space
@@ -93,6 +98,7 @@ exec swaymsg input 1267:10372:ELAN_Touchscreen map_to_output $laptop
 	bindsym $mod+Ctrl+i exec curl -fL "$(wl-paste -n)" | imv -
 	bindsym $mod+Ctrl+p exec systemctl --user reload swww-shuf.service
 	bindsym $mod+Ctrl+c exec foot -a qalc qalc
+	bindsym $mod+Ctrl+v exec LESS=-R foot -a sage sage
 
 	## spotify stuff
 	# queue
@@ -100,8 +106,7 @@ exec swaymsg input 1267:10372:ELAN_Touchscreen map_to_output $laptop
 	# playlist add
 	bindsym $mod+Ctrl+y exec wtype -M alt j -m alt -k down -k right -k down -k down
 
-	bindsym $mod+o       output * power on
-	bindsym $mod+Shift+o output * power off
+	bindsym $mod+o      exec "PASSWORD_STORE_DIR=~/.local/share/pass pass otp -c `wmenu -f 'Noto Sans 15' -p OTP: </dev/null`"
 
 	bindsym $mod+Alt+i workspace number 2, exec chromium, workspace number 3, exec nheko -p default, workspace number 1
 
@@ -256,12 +261,13 @@ mode "workspace" {
 	# bindsym XF86LaunchA
 	# bindsym XF86Explorer
 
+	bindsym F12    exec fos.sh
 
 #
 # Misc
 #
 exec dbus-update-activation-environment --systemd \
-	DISPLAY WAYLAND_DISPLAY SWAYSOCK TERMINAL QT_QPA_PLATFORMTHEME XDG_CURRENT_DESKTOP \
+	DISPLAY WAYLAND_DISPLAY SWAYSOCK I3SOCK TERMINAL QT_QPA_PLATFORMTHEME XDG_CURRENT_DESKTOP \
 	&& systemctl --user restart xdg-desktop-portal.service \
 	&& systemctl --user start sway-session.target
 
@@ -291,8 +297,13 @@ for_window [floating app_id="" title=".* is sharing your screen\."] {
 }
 
 for_window [app_id="imv" title="^screenshot$"] fullscreen enable global
-for_window [app_id="nheko" floating] exec "sleep 0.02; swaymsg 'fullscreen; fullscreen'"
+# for_window [app_id="nheko" floating] exec "sleep 0.02; swaymsg 'fullscreen; fullscreen'"
+for_window [app_id="nheko" floating] move to workspace 3
 for_window [app_id="qalc"] floating enable
+for_window [app_id="sage"] floating enable
+
+for_window [app_id="cst"] floating enable, move position 1120 0
+
 
 exec_always kanshictl reload
 

@@ -1,7 +1,11 @@
 local autocmd = vim.api.nvim_create_autocmd
-
-if vim.env.TERM ~= 'linux' then
-	vim.opt.termguicolors = true
+function autocmd(opts)
+	local ev = opts[1]
+	local pat = opts[2]
+	opts[1] = nil
+	opts[2] = nil
+	opts.pattern = pat
+	vim.api.nvim_create_autocmd(ev, opts)
 end
 
 vim.opt.ignorecase = true
@@ -27,20 +31,32 @@ vim.opt.shiftwidth = 0
 vim.opt.smartindent = true
 vim.opt.foldlevelstart = 99
 vim.opt.foldmethod = 'marker'
-vim.opt.diffopt = { 'filler', 'iwhite', 'closeoff', 'internal', 'indent-heuristic' }
+vim.opt.diffopt = { 'filler', 'iwhite', 'closeoff', 'internal', 'indent-heuristic', 'linematch:60' }
 vim.opt.wildmode = { 'longest:full', 'full' }
 vim.opt.inccommand = 'nosplit'
-vim.opt.clipboard = 'unnamed'
+if vim.env.SSH_TTY == nil then
+	vim.opt.clipboard = 'unnamed'
+end
 
-autocmd('FileType', { pattern = 'tex', command = [[setl spell]] })
-autocmd('FileType', { pattern = 'markdown', command = [[
+autocmd{'BufEnter', '*.sage', command = [[setl ft=python]] }
+
+autocmd{'FileType', 'tex', command = [[setl spell]] }
+autocmd{'FileType', 'markdown', command = [[
 	setlocal tw=80
 	compiler markdown
-]]})
-autocmd('FileType', { pattern = 'cs', command = [[compiler dotnet]]})
-autocmd('FileType', { pattern = 'haskell', command = [[set ts=8 sw=2 et]]})
+]]}
+autocmd{'FileType', 'cs', command = [[compiler dotnet]]}
+autocmd{'FileType', 'haskell', command = [[setl ts=8 sw=2 et]]}
+autocmd{'FileType', {'c', 'cpp', 'cs'}, command = [[setl cms=//\ %s]] }
 
-autocmd('BufNewFile', { nested = true, callback = function(info)
+autocmd{'FileType', callback = function(_)
+	local cms = vim.bo.commentstring
+	cms = cms:gsub('(%S)(%%s)', '%1 %2')
+	cms = cms:gsub('(%%s)(%S)', '%1 %2')
+	vim.bo.commentstring = cms
+end}
+
+autocmd{'BufNewFile', nested = true, callback = function(info)
 	local match = vim.fn.matchlist(info.file, [[^\(.\{-1,}\)[(:]\(\d\+\)\%(:\(\d\+\):\?\)\?$]])
 	if #match == 0 then return end
 	local file, row, col = match[2], tonumber(match[3]), tonumber('0'..match[4])
@@ -51,16 +67,16 @@ autocmd('BufNewFile', { nested = true, callback = function(info)
 	else
 		vim.cmd('normal! 0')
 	end
-end})
+end}
 
 vim.cmd[==[
 au BufWritePre /tmp/* setlocal undodir=.
 autocmd BufRead * autocmd FileType <buffer> ++once if &ft !~# 'commit\|rebase' && line("'\"") > 1 && line("'\"") <= line("$") | exe 'normal! g`"' | endif
-au BufNewFile,BufRead *.zig setf zig
 
 com! DiffOrig vert new | set bt=nofile | r ++edit # | 0d_ | diffthis | wincmd p | diffthis
 com! -bang W lua SudoWrite('<bang>' == '!')
 
+colorscheme vim
 hi Error        guibg=DarkRed
 hi ErrorMsg     guibg=DarkRed
 hi Folded       guibg=NONE guifg=Cyan
@@ -151,7 +167,6 @@ end
 function ToggleBraces()
 	local l = vim.api.nvim_win_get_cursor(0)[1] - 2
 	local lines = vim.api.nvim_buf_get_lines(0, l, l+3, true)
-	print(vim.inspect(lines))
 	local prev, succ1 = string.gsub(lines[1], '%s*{$', '')
 	local succ2 = string.match(lines[3], '^%s*}$')
 	if succ1 == 1 and succ2 then
@@ -176,10 +191,8 @@ vim.keymap.set('n', '<M-k>', '<C-W>k')
 vim.keymap.set('n', '<M-l>', '<C-W>l')
 vim.keymap.set('n', 'É', ':')
 vim.keymap.set('n', 'gs', ToggleBraces)
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
-vim.keymap.set('n', ' e', vim.diagnostic.open_float)
-vim.keymap.set('n', ' q', vim.diagnostic.setloclist)
+vim.keymap.set('n', '<C-/>', 'gcc', {remap=true})
+vim.keymap.set('v', '<C-/>', 'gc',  {remap=true})
 
 local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
 if not vim.loop.fs_stat(lazypath) and executable('git') then
@@ -189,16 +202,6 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require'lazy'.setup({
-	{
-		'numToStr/Comment.nvim',
-		opts = {},
-		keys = {
-			{ mode = 'n', 'gc' },
-			{ mode = 'v', 'gc' },
-			{ mode = 'n', '<C-/>', 'gcc', remap = true},
-			{ mode = 'v', '<C-/>', 'gc',  remap = true},
-		}
-	},
 	{
 		'junegunn/vim-easy-align',
 		keys = {
@@ -276,7 +279,6 @@ require'lazy'.setup({
 				map('n', ' D',    vim.lsp.buf.type_definition)
 				map('n', ' r',    vim.lsp.buf.rename)
 				map('n', ' a',    vim.lsp.buf.code_action)
-				map('n', 'K',     vim.lsp.buf.hover)
 				map('n', 'gD',    vim.lsp.buf.declaration)
 				map('n', '<C-k>', vim.lsp.buf.signature_help)
 
@@ -311,7 +313,7 @@ require'lazy'.setup({
 			-- lspconfig.jsonls.setup{
 			-- 	cmd = { 'vscode-json-languageserver', '--stdio' },
 			-- }
-			lspconfig.tsserver.setup{}
+			lspconfig.ts_ls.setup{}
 			lspconfig.pyright.setup{}
 			--lspconfig.jedi_language_server.setup{}
 			lspconfig.texlab.setup{
@@ -338,14 +340,15 @@ require'lazy'.setup({
 					},
 				},
 			}
-			lspconfig.omnisharp.setup{
-				cmd = { 'omnisharp' },
-			}
-			lspconfig.rust_analyzer.setup{}
+			-- lspconfig.omnisharp.setup{
+			-- 	cmd = { 'omnisharp' },
+			-- }
+			-- lspconfig.rust_analyzer.setup{}
 			lspconfig.hls.setup{}
 			-- lspconfig.jdtls.setup{}
-			lspconfig.bashls.setup{}
+			-- lspconfig.bashls.setup{}
 			lspconfig.gdscript.setup{}
+			lspconfig.zls.setup{}
 		end,
 	},
 	{
@@ -426,10 +429,15 @@ require'lazy'.setup({
 	{
 		'mfussenegger/nvim-jdtls',
 		ft = 'java',
-		config = function() require'jdtls'.start_or_attach{
-			cmd = {'jdtls'},
-			on_attach = require'lspconfig'.util.default_config.on_attach,
-		} end,
+		config = function()
+			local attach = function() require'jdtls'.start_or_attach {
+				cmd = {'jdtls'},
+				on_attach = require'lspconfig'.util.default_config.on_attach,
+				root_dir = vim.fs.root(0, {'.git', 'mvnw', 'gradlew'})
+			} end
+			attach()
+			autocmd{'FileType', 'java', callback = attach }
+		end,
 	},
 	{
 		'ray-x/lsp_signature.nvim',
@@ -446,6 +454,8 @@ require'lazy'.setup({
 	'peterhoeg/vim-qml',
 	'vito-c/jq.vim',
 	'mikebentley15/vim-pio',
+	'HiPhish/info.vim',
+	-- { 'RaafatTurki/hex.nvim', opts = {} },
 	-- 'mattn/emmet-vim',
 }, {
 	ui = {
