@@ -246,10 +246,6 @@ require'lazy'.setup({
 		config = function()
 			local lspconfig = require 'lspconfig'
 
-			vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, {
-				border = floatBorder,
-			})
-
 			-- silent "unused" warnings
 			local test_ns = vim.api.nvim_create_namespace('test')
 			vim.lsp.handlers['textDocument/publishDiagnostics'] = function(_, result, ctx, config)
@@ -280,8 +276,8 @@ require'lazy'.setup({
 			lspconfig.util.default_config.capabilities = caps
 
       vim.api.nvim_create_autocmd('LspAttach', { callback = function(ev)
-				local map = function(mode, keys, func)
-					vim.keymap.set(mode, keys, func, { buffer = ev.buf })
+				local map = function(mode, keys, func, arg)
+					vim.keymap.set(mode, keys, function() func(arg) end, { buffer = ev.buf })
 				end
 				map('n', 'gd',    vim.lsp.buf.definition)
 				map('n', 'gr',    vim.lsp.buf.references)
@@ -290,7 +286,9 @@ require'lazy'.setup({
 				map('n', ' r',    vim.lsp.buf.rename)
 				map('n', ' a',    vim.lsp.buf.code_action)
 				map('n', 'gD',    vim.lsp.buf.declaration)
-				map('n', '<C-k>', vim.lsp.buf.signature_help)
+				map('n', '<C-k>', vim.lsp.buf.signature_help, {border = floatBorder})
+				map('i', '<C-s>', vim.lsp.buf.signature_help, {border = floatBorder})
+				map('n', 'K',     vim.lsp.buf.hover, {border = floatBorder})
 
 				-- Set some keybinds conditional on server capabilities
         local client = vim.lsp.get_client_by_id(ev.data.client_id)
