@@ -1,0 +1,13 @@
+#!/bin/bash
+
+file='/tmp/screenshot.png'
+case "$1" in
+	full) grim "$file" ;;
+	active) swaymsg -t get_tree | jq -r '..|select(.focused?)|"\(.rect.x+.window_rect.x),\(.rect.y+.window_rect.y) \(.window_rect.width)x\(.window_rect.height)"' | grim -g - "$file" ;;
+	rect) slurp | grim -g - "$file" ;;
+	# rect) grim -l 0 - | imv -f - & slurp | grim -g - "$file"; kill $! ;;
+	# rect) grim -l 0 - | imv -w screenshot - & slurp | grim -g - "$file"; kill $! ;;
+esac
+wl-copy -t image/png <"$file"
+
+# vim: ts=2 sw=0 noet

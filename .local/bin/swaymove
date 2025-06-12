@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if [ `swaytree '.[] | select(.focused).type' -r` = workspace ]; then
+	swaymsg -q move workspace to output $1
+else
+	swaymsg -q move $1 20 px
+fi

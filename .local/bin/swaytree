@@ -1,0 +1,5 @@
+#!/bin/sh
+
+filter="${1:-.}"
+shift
+exec swaymsg -t get_tree | jq "[recurse(.nodes[], .floating_nodes[]) | (.nodes, .floating_nodes)[] |= .id | (.id, .nodes[], .floating_nodes[], .focus[]) |= tostring | {key: .id, value: .}] | from_entries | $filter" "$@"

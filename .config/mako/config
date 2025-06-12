@@ -1,6 +1,8 @@
 background-color=#285577AA
 default-timeout=5000
 #layer=overlay
+height=200
+
 
 [app-name=Element]
 on-button-left=exec swaymsg '[app_id="Electron" title="Element.*"] focus' && makoctl invoke -n "$id"

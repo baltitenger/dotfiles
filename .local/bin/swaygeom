@@ -1,0 +1,6 @@
+#!/bin/sh
+exec swaymsg -t get_tree | jq -r '
+recurse(.nodes[], .floating_nodes[])
+| select('"$1"')
+| "\(.rect.x+.window_rect.x),\(.rect.y+.window_rect.y) \(.window_rect.width)x\(.window_rect.height)"
+'

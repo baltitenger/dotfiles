@@ -1,0 +1,8 @@
+#!/bin/sh -e
+
+while next="$({ echo ../; ls -p; } | wmenu -if 'Noto Sans 15')"; do
+	case "$next" in
+		*/|..) cd "$next" ;;
+		*) exec mimeopen "$next" ;;
+	esac
+done

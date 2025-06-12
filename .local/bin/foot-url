@@ -1,0 +1,10 @@
+#!/bin/bash
+
+exec > >(systemd-cat -t foot-url) 2>&1
+
+echo foot-url: $1
+
+case "$1" in
+	"file://$HOSTNAME"* | /*) mimeopen "${1#file://$HOSTNAME}" ;;
+	*) xdg-open "$1" ;;
+esac

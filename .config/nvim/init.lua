@@ -116,6 +116,15 @@ vim.g.tex_flavor = 'latex'
 vim.g.html_indent_script1 = 'inc'
 vim.g.html_indent_style1 = 'inc'
 
+vim.diagnostic.config({ virtual_text = true })
+vim.keymap.set('n', 'gK', function()
+	local old = vim.diagnostic.config()
+	vim.diagnostic.config({
+		virtual_lines = not old.virtual_lines,
+		virtual_text = not old.virtual_text,
+	})
+end, { desc = 'Toggle diagnostic virtual_{lines,text}' })
+
 local function executable(cmd)
 	return vim.fn.executable(cmd) == 1
 end
@@ -180,6 +189,7 @@ function ToggleBraces()
 end
 
 vim.keymap.set('n', '<Leader>/', '<Cmd>noh<CR>')
+vim.keymap.set('n', '<M-u>', '<Cmd>noh<CR>')
 vim.keymap.set('n', 'Y', 'y$')
 vim.keymap.set('n', 'gb', GitBlame)
 -- vim.keymap.set('v', '<Leader>w', VisualWc)
@@ -327,7 +337,7 @@ require'lazy'.setup({
 								'-synctex=1',
 								'-lualatex',
 								-- '-outdir=build',
-								'-latexoption=-cnf-line=shell_escape_commands=${shell_escape_commands},dot,neato,texcount',
+								'-latexoption=-cnf-line=shell_escape_commands=${shell_escape_commands},dot,neato,texcount,latexminted',
 								'%f'
 							},
 							outputDirectory = 'build',
@@ -349,6 +359,7 @@ require'lazy'.setup({
 			-- lspconfig.bashls.setup{}
 			lspconfig.gdscript.setup{}
 			lspconfig.zls.setup{}
+			lspconfig.gopls.setup{}
 		end,
 	},
 	{

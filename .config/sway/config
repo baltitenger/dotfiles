@@ -94,7 +94,7 @@ input 1267:10372:ELAN_Touchscreen map_to_output $laptop
 	bindsym Shift+Print exec wl-sshot active
 	bindsym Ctrl+Print  exec wl-sshot full
 
-	bindsym $mod+Ctrl+m exec mpv "$(wl-paste -n)"
+	bindsym $mod+Ctrl+m exec mpv --script-opts=ytdl_hook-all_formats=yes "$(wl-paste -n)"
 	bindsym $mod+Ctrl+i exec curl -fL "$(wl-paste -n)" | imv -
 	bindsym $mod+Ctrl+p exec systemctl --user reload swww-shuf.service
 	bindsym $mod+Ctrl+c exec foot -a qalc qalc

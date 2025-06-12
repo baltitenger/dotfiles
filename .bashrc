@@ -81,8 +81,8 @@ alias bp="curl -F 'raw=<-' https://bpa.st/curl"
 alias imgur="{ curl -sH 'Authorization: Client-ID 0bffa5b4ac8383c' -F 'image=<-' https://api.imgur.com/3/image | jq -r .data.link; }"
 alias 0x0="curl -F'file=@-' http://0x0.st"
 # alias man=$'LESS_TERMCAP_md="\e[01;91m" LESS_TERMCAP_me="\e[0m" LESS_TERMCAP_us="\e[01;32m" LESS_TERMCAP_ue="\e[0m" man'
-alias man='LESS=-Dd+r\ -DuG GROFF_NO_SGR= man'
-alias perldoc='LESS=-Dd+r\ -DuG GROFF_NO_SGR= perldoc -o man'
+alias man='LESS=Dd+r\$DuG GROFF_NO_SGR= man'
+alias perldoc='LESS=Dd+r\$DuG GROFF_NO_SGR= perldoc -o man'
 alias sudo='sudo '
 alias dotnet='DOTNET_CLI_TELEMETRY_OPTOUT=1 dotnet'
 # alias armexec="bwrap --unshare-ipc --unshare-pid --unshare-uts --unshare-cgroup --hostname arm-chroot \
@@ -106,7 +106,6 @@ alias userctl='systemctl --user'
 # alias cmake='CMAKE_EXPORT_COMPILE_COMMANDS=ON PICO_SDK_PATH=~/stuff/pico-sdk PICO_EXTRAS_PATH=~/stuff/pico-extras FREERTOS_KERNEL_PATH=~/stuff/FreeRTOS-Kernel CMAKE_GENERATOR=Ninja cmake'
 alias cmake='CMAKE_EXPORT_COMPILE_COMMANDS=ON PICO_SDK_PATH=~/stuff/pico-sdk PICO_EXTRAS_PATH=~/stuff/pico-extras CMAKE_GENERATOR=Ninja cmake'
 alias make='NANOPB_DIR=~/stuff/nanopb make'
-alias binaryninja='QT_QPA_PLATFORM=wayland-egl binaryninja'
 alias sage='LESS=-R sage'
 info() { nvim -R -M +"Info $1 $2" +only; }
 
