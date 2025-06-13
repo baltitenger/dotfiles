@@ -276,9 +276,11 @@ require'lazy'.setup({
 			lspconfig.util.default_config.capabilities = caps
 
       vim.api.nvim_create_autocmd('LspAttach', { callback = function(ev)
-				local map = function(mode, keys, func, arg)
-					vim.keymap.set(mode, keys, function() func(arg) end, { buffer = ev.buf })
+				local map = function(mode, keys, func)
+					vim.keymap.set(mode, keys, func, { buffer = ev.buf })
 				end
+				local sig_help = function() vim.lsp.buf.signature_help{border = floatBorder} end
+				local hover = function() vim.lsp.buf.hover{border = floatBorder} end
 				map('n', 'gd',    vim.lsp.buf.definition)
 				map('n', 'gr',    vim.lsp.buf.references)
 				map('n', 'gI',    vim.lsp.buf.implementation)
@@ -286,9 +288,10 @@ require'lazy'.setup({
 				map('n', ' r',    vim.lsp.buf.rename)
 				map('n', ' a',    vim.lsp.buf.code_action)
 				map('n', 'gD',    vim.lsp.buf.declaration)
-				map('n', '<C-k>', vim.lsp.buf.signature_help, {border = floatBorder})
-				map('i', '<C-s>', vim.lsp.buf.signature_help, {border = floatBorder})
-				map('n', 'K',     vim.lsp.buf.hover, {border = floatBorder})
+				map('n', '<C-k>', sig_help)
+				map('i', '<C-s>', sig_help)
+				map('n', 'K',     hover)
+				autocmd{'CursorHoldI', buffer = ev.buf, callback = sig_help }
 
 				-- Set some keybinds conditional on server capabilities
         local client = vim.lsp.get_client_by_id(ev.data.client_id)
@@ -448,16 +451,16 @@ require'lazy'.setup({
 			autocmd{'FileType', 'java', callback = attach }
 		end,
 	},
-	{
-		'ray-x/lsp_signature.nvim',
-		opts = {
-			bind = true,
-			hint_enable = false,
-			handler_opts = {
-				border = floatBorder,
-			},
-		},
-	},
+	-- {
+	-- 	'ray-x/lsp_signature.nvim',
+	-- 	opts = {
+	-- 		bind = true,
+	-- 		hint_enable = false,
+	-- 		handler_opts = {
+	-- 			border = floatBorder,
+	-- 		},
+	-- 	},
+	-- },
 	'PeterRincker/vim-argumentative',
 	'tpope/vim-surround',
 	'peterhoeg/vim-qml',
