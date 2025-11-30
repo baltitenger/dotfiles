@@ -211,6 +211,96 @@ if not vim.loop.fs_stat(lazypath) and executable('git') then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- -- silent "unused" warnings
+-- local test_ns = vim.api.nvim_create_namespace('test')
+-- vim.lsp.handlers['textDocument/publishDiagnostics'] = function(_, params, ctx)
+-- 	local bufnr = vim.uri_to_bufnr(params.uri)
+-- 	if not bufnr then return end
+-- 	vim.api.nvim_buf_clear_namespace(bufnr, test_ns, 0, -1)
+-- 	params.diagnostics = vim.tbl_filter(function(diag)
+-- 		if not (diag.tags and vim.tbl_contains(diag.tags, vim.lsp.protocol.DiagnosticTag.Unnecessary)) then
+-- 			return true
+-- 		end
+-- 		pcall(vim.api.nvim_buf_set_extmark, bufnr, test_ns,
+-- 				diag.range.start.line, diag.range.start.character, {
+-- 			end_row = diag.range['end'].line,
+-- 			end_col = diag.range['end'].character, -- this sux
+-- 			hl_group = 'Dim',
+-- 		})
+-- 	end, params.diagnostics)
+-- 	vim.lsp.diagnostic.on_publish_diagnostics(_, params, ctx)
+-- end
+
+-- almost the same as above but will be included in ]d [d list
+function filter_out_unnecessary_diags(orig) return {
+  show = function(ns, bufnr, diags, opts)
+		diags = vim.tbl_filter(function(diag)
+			return not (diag.severity == vim.diagnostic.severity.HINT and diag._tags.unnecessary)
+		end, diags)
+    return orig.show(ns, bufnr, diags, opts)
+  end,
+  hide = orig.hide
+} end
+vim.diagnostic.handlers.signs         = filter_out_unnecessary_diags(vim.diagnostic.handlers.signs)
+vim.diagnostic.handlers.virtual_text  = filter_out_unnecessary_diags(vim.diagnostic.handlers.virtual_text)
+vim.diagnostic.handlers.virtual_lines = filter_out_unnecessary_diags(vim.diagnostic.handlers.virtual_lines)
+
+-- TODO
+-- local caps = vim.lsp.protocol.make_client_capabilities()
+-- caps = vim.tbl_deep_extend('force', caps, require('cmp_nvim_lsp').default_capabilities())
+-- lspconfig.util.default_config.capabilities = caps
+
+vim.api.nvim_create_autocmd('LspAttach', { callback = function(ev)
+	local map = function(mode, keys, func, arg)
+		vim.keymap.set(mode, keys, function() func(arg) end, { buffer = ev.buf })
+	end
+	map('n', 'gd',    vim.lsp.buf.definition)
+	map('n', 'gr',    vim.lsp.buf.references)
+	map('n', 'gI',    vim.lsp.buf.implementation)
+	map('n', ' D',    vim.lsp.buf.type_definition)
+	map('n', ' r',    vim.lsp.buf.rename)
+	map('n', ' a',    vim.lsp.buf.code_action)
+	map('n', 'gD',    vim.lsp.buf.declaration)
+	map('n', '<C-k>', vim.lsp.buf.signature_help, {border = floatBorder})
+	map('i', '<C-s>', vim.lsp.buf.signature_help, {border = floatBorder})
+	map('n', 'K',     vim.lsp.buf.hover, {border = floatBorder})
+
+	-- Set some keybinds conditional on server capabilities
+	local client = vim.lsp.get_client_by_id(ev.data.client_id)
+	if client.server_capabilities.documentFormattingProvider then
+		map('n', ' f', function() vim.lsp.buf.format{} end)
+	end
+	if client.server_capabilities.documentRangeFormattingProvider then
+		map('v', ' f', function() vim.lsp.buf.format{}; vim.api.nvim_input('<Esc>') end)
+	end
+	if client.server_capabilities.signatureHelpProvider then
+		autocmd{'CursorHoldI', buffer = ev.buf, callback = function()
+			vim.lsp.buf.signature_help{border = floatBorder, focus = false}
+		end }
+	end
+
+	-- keep vim internal formatter
+	vim.bo[ev.buf].formatexpr = vim.go.formatexpr
+end})
+
+local oldnotify = vim.notify
+vim.notify = function(msg, level, opts)
+	if vim.startswith(msg, 'Spawning language server with cmd: ') then return end
+	oldnotify(msg, level, opts)
+end
+
+vim.lsp.enable{ 'clangd', 'html', 'cssls', 'jsonls', 'ts_ls', 'pyright', 'texlab', 'omnisharp', 'rust_analyzer', 'hls', 'gdscript', 'zls', 'gopls', 'c3_lsp' }
+vim.lsp.config('texlab', {
+	settings = {
+		texlab = {
+			build = {
+				args = { '-interaction=nonstopmode', '%f' },
+				onSave = true,
+			},
+		},
+	},
+})
+
 require'lazy'.setup({
 	{
 		'junegunn/vim-easy-align',
@@ -241,128 +331,7 @@ require'lazy'.setup({
 			vim.g.easy_align_delimiters = delims
 		end,
 	},
-	{
-		'neovim/nvim-lspconfig',
-		config = function()
-			local lspconfig = require 'lspconfig'
-
-			-- silent "unused" warnings
-			local test_ns = vim.api.nvim_create_namespace('test')
-			vim.lsp.handlers['textDocument/publishDiagnostics'] = function(_, result, ctx, config)
-				local bufnr = vim.uri_to_bufnr(result.uri)
-				if not bufnr then
-					return
-				end
-				vim.api.nvim_buf_clear_namespace(bufnr, test_ns, 0, -1)
-				local real_diags = {}
-				for _, diag in pairs(result.diagnostics) do
-					if diag.tags and vim.tbl_contains(diag.tags, vim.lsp.protocol.DiagnosticTag.Unnecessary) then
-						pcall(vim.api.nvim_buf_set_extmark, bufnr, test_ns,
-								diag.range.start.line, diag.range.start.character, {
-							end_row = diag.range['end'].line,
-							end_col = diag.range['end'].character,
-							hl_group = 'Dim',
-						})
-					else
-						table.insert(real_diags, diag)
-					end
-				end
-				result.diagnostics = real_diags
-				vim.lsp.diagnostic.on_publish_diagnostics(_, result, ctx, config)
-			end
-
-      local caps = vim.lsp.protocol.make_client_capabilities()
-      caps = vim.tbl_deep_extend('force', caps, require('cmp_nvim_lsp').default_capabilities())
-			lspconfig.util.default_config.capabilities = caps
-
-      vim.api.nvim_create_autocmd('LspAttach', { callback = function(ev)
-				local map = function(mode, keys, func, arg)
-					vim.keymap.set(mode, keys, function() func(arg) end, { buffer = ev.buf })
-				end
-				map('n', 'gd',    vim.lsp.buf.definition)
-				map('n', 'gr',    vim.lsp.buf.references)
-				map('n', 'gI',    vim.lsp.buf.implementation)
-				map('n', ' D',    vim.lsp.buf.type_definition)
-				map('n', ' r',    vim.lsp.buf.rename)
-				map('n', ' a',    vim.lsp.buf.code_action)
-				map('n', 'gD',    vim.lsp.buf.declaration)
-				map('n', '<C-k>', vim.lsp.buf.signature_help, {border = floatBorder})
-				map('i', '<C-s>', vim.lsp.buf.signature_help, {border = floatBorder})
-				map('n', 'K',     vim.lsp.buf.hover, {border = floatBorder})
-				autocmd{'CursorHoldI', buffer = ev.buf, callback = function()
-					vim.lsp.buf.signature_help{border = floatBorder, focus = false}
-				end }
-
-				-- Set some keybinds conditional on server capabilities
-        local client = vim.lsp.get_client_by_id(ev.data.client_id)
-				if client.server_capabilities.documentFormattingProvider then
-					map('n', ' f', function() vim.lsp.buf.format{} end)
-				end
-				if client.server_capabilities.documentRangeFormattingProvider then
-					map('v', ' f', function() vim.lsp.buf.format{}; vim.api.nvim_input('<Esc>') end)
-				end
-
-				-- keep vim internal formatter
-				vim.bo[ev.buf].formatexpr = vim.go.formatexpr
-			end})
-
-			local oldnotify = vim.notify
-			vim.notify = function(msg, level, opts)
-				if vim.startswith(msg, 'Spawning language server with cmd: ') then return end
-				oldnotify(msg, level, opts)
-			end
-
-			lspconfig.clangd.setup{
-				cmd = { 'clangd', '--background-index', '--clang-tidy', '--completion-style=detailed', '--header-insertion=iwyu', '--query-driver=/usr/bin/*,/home/baltazar/.espressif/tools/**/bin/*' },
-			}
-			lspconfig.html.setup{
-				cmd = { 'vscode-html-languageserver', '--stdio' },
-			}
-			lspconfig.cssls.setup{
-				cmd = { 'vscode-css-languageserver', '--stdio' },
-			}
-			-- lspconfig.jsonls.setup{
-			-- 	cmd = { 'vscode-json-languageserver', '--stdio' },
-			-- }
-			lspconfig.ts_ls.setup{}
-			lspconfig.pyright.setup{}
-			--lspconfig.jedi_language_server.setup{}
-			lspconfig.texlab.setup{
-				settings = {
-					texlab = {
-						build = {
-							executable = 'latexmk',
-							args = {
-								'-pdf',
-								'-interaction=nonstopmode',
-								'-synctex=1',
-								'-lualatex',
-								-- '-outdir=build',
-								'-latexoption=-cnf-line=shell_escape_commands=${shell_escape_commands},dot,neato,texcount,latexminted',
-								'%f'
-							},
-							outputDirectory = 'build',
-							onSave = true,
-						},
-						forwardSearch = {
-							executable = 'okular',
-							args = { '%p' },
-						},
-					},
-				},
-			}
-			-- lspconfig.omnisharp.setup{
-			-- 	cmd = { 'omnisharp' },
-			-- }
-			-- lspconfig.rust_analyzer.setup{}
-			lspconfig.hls.setup{}
-			-- lspconfig.jdtls.setup{}
-			-- lspconfig.bashls.setup{}
-			lspconfig.gdscript.setup{}
-			lspconfig.zls.setup{}
-			lspconfig.gopls.setup{}
-		end,
-	},
+	'neovim/nvim-lspconfig',
 	{
 		'hrsh7th/nvim-cmp',
 		dependencies = {
@@ -431,12 +400,9 @@ require'lazy'.setup({
 	},
 	{
 		'nvim-treesitter/nvim-treesitter',
+		lazy = false,
+		branch = 'main',
 		build = ':TSUpdate',
-		config = function() require'nvim-treesitter.configs'.setup {
-			ensure_installed = { 'cpp', 'html', 'css', 'javascript' },
-			highlight = { enable = true },
-			indent = { enable = false },
-		} end
 	},
 	{
 		'mfussenegger/nvim-jdtls',

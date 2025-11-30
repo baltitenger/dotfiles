@@ -2,3 +2,8 @@ If:
   PathMatch: [ .*\.cc, .*\.cpp ]
 CompileFlags:
   Add: [-Wall, -Wextra, -std=c++23]
+---
+If:
+  PathMatch: [ .*\.c ]
+CompileFlags:
+  Add: [-Wall, -Wextra, -std=c23]

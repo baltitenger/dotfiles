@@ -29,18 +29,17 @@ shortps1() {
 longps1
 
 precmd() {
-	local cmd
+	local cmd rest
 	if [ "${BASH_COMMAND% *}" == fg ]; then
 		local j="${BASH_COMMAND##fg*( )}"
 		cmd="$(tr '\0' ' ' <"/proc/$(jobs -p ${j:-%+} 2>/dev/null)/cmdline")"
 	else
 		cmd="$BASH_COMMAND"
-		while read x rest <<<"$cmd" && [[ "$x" == *=* || "$x" == sudo ]]; do
+		while read cmd rest <<<"$cmd" && [[ "$cmd" == *=* || "$cmd" == sudo ]]; do
 			cmd="$rest"
 		done
 	fi
-	cmd="${cmd#sudo }"
-	printf $'\e]0;%s\a' "${cmd%% *}" >/dev/tty
+	printf $'\e]0;%s\a' "$cmd" >/dev/tty
 }
 
 alias config="git --git-dir=$HOME/.cfg --work-tree=$HOME"
@@ -80,6 +79,7 @@ alias ix="curl -F 'f:1=<-' ix.io"
 alias bp="curl -F 'raw=<-' https://bpa.st/curl"
 alias imgur="{ curl -sH 'Authorization: Client-ID 0bffa5b4ac8383c' -F 'image=<-' https://api.imgur.com/3/image | jq -r .data.link; }"
 alias 0x0="curl -F'file=@-' http://0x0.st"
+alias x0="curl -F'file=@-' https://x0.at"
 # alias man=$'LESS_TERMCAP_md="\e[01;91m" LESS_TERMCAP_me="\e[0m" LESS_TERMCAP_us="\e[01;32m" LESS_TERMCAP_ue="\e[0m" man'
 alias man='LESS=Dd+r\$DuG GROFF_NO_SGR= man'
 alias perldoc='LESS=Dd+r\$DuG GROFF_NO_SGR= perldoc -o man'
